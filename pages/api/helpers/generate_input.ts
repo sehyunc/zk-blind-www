@@ -7,14 +7,17 @@ import { Hash } from "./fast-sha256";
 const pki = require("node-forge").pki;
 
 export async function generate_inputs(
-  signature: string = "mLCysHQtDftfFey4F-ntFma22r5-qpxtkXsiDw6TY30Tnoj2kPQ_YdSjzagrwRgF7pHE8SSM_roo2wDh3c_8vDNRZeax4VICZjYmPS-3ZWAV0XyjjlgWgFconstqVT72M-VlPCdecHiYQJojlYHJyGybvTCaX1cqoF9aAMy8wBvRbSceECmX15k4nKG51Z5Le7k_vOShaxYmwrRhMIip4KRv-DW1FXAdi_F-MYSrqZ6Oq-nglMujxD2NOoHoqOqmyd1OMIrc6oIRuRqBXlRnQ0IdUDQbiXfyFVC0ItIME3a4SLoWp_rrmY1tSrGJu93MZrjhzfkNglJ-FOp4kKZAKkzA",
+  signature: string = "mLCysHQtDftfFey4F-ntFma22r5-qpxtkXsiDw6TY30Tnoj2kPQ_YdSjzagrwRgF7pHE8SSM_roo2wDh3c_8vDNRZeax4VICZjYmPS-3ZWAV0XyjjlgWgFleTqVT72M-VlPCdecHiYQJojlYHJyGybvTCaX1cqoF9aAMy8wBvRbSceECmX15k4nKG51Z5Le7k_vOShaxYmwrRhMIip4KRv-DW1FXAdi_F-MYSrqZ6Oq-nglMujxD2NOoHoqOqmyd1OMIrc6oIRuRqBXlRnQ0IdUDQbiXfyFVC0ItIME3a4SLoWp_rrmY1tSrGJu93MZrjhzfkNglJ-FOp4kKZAKkzA",
   msg: string = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJzZWh5dW5AYmVya2VsZXkuZWR1IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImdlb2lwX2NvdW50cnkiOiJVUyJ9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXIta1dMaXBzT3dMZFd4MXdMc0I3clR3UnFlIn0sImlzcyI6Imh0dHBzOi8vYXV0aDAub3BlbmFpLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNjYwOTg2MjEwMzkxMTMwNjgwNyIsImF1ZCI6WyJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxIiwiaHR0cHM6Ly9vcGVuYWkuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTY3MzE1NTQ0NiwiZXhwIjoxNjczNzYwMjQ2LCJhenAiOiJUZEpJY2JlMTZXb1RIdE45NW55eXdoNUU0eU9vNkl0RyIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgbW9kZWwucmVhZCBtb2RlbC5yZXF1ZXN0IG9yZ2FuaXphdGlvbi5yZWFkIG9mZmxpbmVfYWNjZXNzIn0",
   ethAddress: string = "0x0000000000000000000000000000000000000000"
 ): Promise<any> {
   const sig = BigInt("0x" + Buffer.from(signature, "base64").toString("hex"));
   const message = Buffer.from(msg);
+  const payload_idx = msg.indexOf('.') + 1
+  const payload_raw = msg.substring(payload_idx)
+  const payload = Buffer.from(payload_raw)
 
-  const { domain: domainStr, domain_idx: domain_index } = findDomain(msg)
+  const { domain: domainStr, domain_idx: domain_index } = findDomain(payload_raw)
   const domain = Buffer.from(domainStr ?? "")
   const domain_idx_num = BigInt(domain_index ?? 0)
 
@@ -29,6 +32,7 @@ export async function generate_inputs(
     sig,
     modulus,
     message,
+    payload,
     ethAddress,
     circuitType,
     domain_idx_num,
@@ -76,14 +80,6 @@ function int8toBytes(num: number): Uint8Array {
   const view = new DataView(arr);
   view.setUint8(0, num); // byteOffset = 0; litteEndian = false
   return new Uint8Array(arr);
-}
-
-// replace the . with a '0' for the payload circuit input
-function generatePayloadString(token: string[]) {
-  let clone = [...token]
-  const period_idx = clone.findIndex(element => element == '46');
-  if (period_idx) clone[period_idx] = '0'
-  return clone
 }
 
 // converts ascii to string
@@ -182,6 +178,7 @@ export async function getCircuitInputs(
   rsa_signature: BigInt,
   rsa_modulus: BigInt,
   msg: Buffer,
+  payload_raw: Buffer,
   eth_address: string,
   circuit: CircuitType,
   domain_idx_num: BigInt,
@@ -195,9 +192,10 @@ export async function getCircuitInputs(
 }> {
   console.log("Starting processing of inputs");
   const modulusBigInt = rsa_modulus;
-  // Message is the email header with the body hash
+  // Message is the header + payload
   const prehash_message_string = msg;
   const signatureBigInt = rsa_signature;
+  const prehash_payload_string = payload_raw
 
   // Perform conversions
   const prehashBytesUnpadded =
@@ -205,9 +203,19 @@ export async function getCircuitInputs(
       ? new TextEncoder().encode(prehash_message_string)
       : Uint8Array.from(prehash_message_string);
 
+  const payloadBytesUnpadded =
+  typeof prehash_payload_string == "string"
+    ? new TextEncoder().encode(prehash_payload_string)
+    : Uint8Array.from(prehash_payload_string);
+
   // Sha add padding
   const [messagePadded, messagePaddedLen] = await sha256Pad(
     prehashBytesUnpadded,
+    MAX_HEADER_PADDED_BYTES
+  );
+
+  const [payloadPadded, payloadPaddedLen] = await sha256Pad(
+    payloadBytesUnpadded,
     MAX_HEADER_PADDED_BYTES
   );
 
@@ -236,8 +244,8 @@ export async function getCircuitInputs(
 
   const message_padded_bytes = messagePaddedLen.toString();
   const message = await Uint8ArrayToCharArray(messagePadded); // Packed into 1 byte signals
-  const payload = await generatePayloadString(message);
   const domain = await Uint8ArrayToCharArray(domainPadded);
+  const payload = await Uint8ArrayToCharArray(payloadPadded);
   const domain_idx = domain_idx_num.toString()
 
   const address = bytesToBigInt(fromHex(eth_address)).toString();
