@@ -59,13 +59,26 @@ export default function Home() {
           justifyContent="center"
           minH="100vh"
         >
-          <ConnectButton />
-          <Textarea
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            size="lg"
-          />
-          <Button>Verify</Button>
+          <Flex
+            direction="column"
+            alignItems="center"
+            backgroundColor="#241520"
+            padding="8"
+            gap="4"
+            borderRadius="10"
+          >
+            <ConnectButton />
+            <Textarea
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              size="lg"
+              placeholder="Paste your JWT here"
+              _placeholder={{ color: "#992870" }}
+            />
+            <Button backgroundColor="#992870" variant="solid">
+              Verify
+            </Button>
+          </Flex>
         </Container>
       </main>
     </>
