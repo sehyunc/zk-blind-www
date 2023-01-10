@@ -13,9 +13,14 @@ export async function generate_inputs(
 ): Promise<any> {
   const sig = BigInt("0x" + Buffer.from(signature, "base64").toString("hex"));
   const message = Buffer.from(msg);
+
+  const { domain: domainStr, domain_idx: domain_index } = findDomain(msg)
+  const domain = Buffer.from(domainStr ?? "")
+  const domain_idx_num = BigInt(domain_index ?? 0)
+
   const circuitType = CircuitType.JWT;
   const pubkey = fs.readFileSync(
-    "/Users/sehyun/code/zk-blind-www/pages/api/helpers/public_key.pem"
+    "/Users/kayleegeorge/code/zk/zk-blind-www/pages/api/helpers/public_key.pem"
   );
   const pubKeyData = pki.publicKeyFromPem(pubkey.toString());
 
@@ -25,7 +30,9 @@ export async function generate_inputs(
     modulus,
     message,
     ethAddress,
-    circuitType
+    circuitType,
+    domain_idx_num,
+    domain
   );
 
   return fin_result.circuitInputs;
@@ -33,11 +40,14 @@ export async function generate_inputs(
 
 export interface ICircuitInputs {
   message?: string[];
+  payload?: string[];
   modulus?: string[];
   signature?: string[];
   address?: string;
   address_plus_one?: string;
   message_padded_bytes?: string;
+  domain?: string[];
+  domain_idx?: string;
 }
 enum CircuitType {
   RSA = "rsa",
@@ -66,6 +76,49 @@ function int8toBytes(num: number): Uint8Array {
   const view = new DataView(arr);
   view.setUint8(0, num); // byteOffset = 0; litteEndian = false
   return new Uint8Array(arr);
+}
+
+// replace the . with a '0' for the payload circuit input
+function generatePayloadString(token: string[]) {
+  let clone = [...token]
+  const period_idx = clone.findIndex(element => element == '46');
+  if (period_idx) clone[period_idx] = '0'
+  return clone
+}
+
+// converts ascii to string
+function AsciiArrayToString(arr: Buffer) {
+  let str = ''
+  for (let i = 0; i < arr.length; i++){
+    str += String.fromCharCode(arr[i]);
+  }
+  return str
+}
+
+// TODO: FIX THIS IS UGLY
+function zerosString(n: number) {
+  let s = ""
+  for (let i = 0; i < n; i++) {
+    s += '0'
+  }
+  return s
+}
+
+// find email domain in msg 
+function findDomain(msg: string) {
+  let domain_idx
+  let domain
+  var s = Buffer.from(msg, 'base64')
+  var json = AsciiArrayToString(s)
+  const email_regex = /([-a-zA-Z._+]+)@([-a-zA-Z]+).([a-zA-Z]+)/
+  const match = json.match(email_regex)
+  console.log(match)
+  if (match) {
+      domain = match[2] // [0] = whole group, then capture groups
+      let email_index = match.index
+      if (email_index) domain_idx = match[0].indexOf(domain) + email_index
+  }
+  return { domain, domain_idx }
 }
 
 function mergeUInt8Arrays(a1: Uint8Array, a2: Uint8Array): Uint8Array {
@@ -130,7 +183,9 @@ export async function getCircuitInputs(
   rsa_modulus: BigInt,
   msg: Buffer,
   eth_address: string,
-  circuit: CircuitType
+  circuit: CircuitType,
+  domain_idx_num: BigInt,
+  domain_raw: Buffer,
 ): Promise<{
   valid: {
     validSignatureFormat?: boolean;
@@ -156,6 +211,15 @@ export async function getCircuitInputs(
     MAX_HEADER_PADDED_BYTES
   );
 
+  // domain padding
+  const domainUnpadded =
+  typeof domain_raw == "string"
+    ? new TextEncoder().encode(domain_raw)
+    : Uint8Array.from(domain_raw);
+
+  const zerosPadArray = new Uint8Array(30 - domainUnpadded.length)
+  const domainPadded = new Uint8Array([...domainUnpadded, ...zerosPadArray])
+
   // Ensure SHA manual unpadded is running the correct function
   const shaOut = await partialSha(messagePadded, messagePaddedLen);
   assert(
@@ -172,6 +236,9 @@ export async function getCircuitInputs(
 
   const message_padded_bytes = messagePaddedLen.toString();
   const message = await Uint8ArrayToCharArray(messagePadded); // Packed into 1 byte signals
+  const payload = await generatePayloadString(message);
+  const domain = await Uint8ArrayToCharArray(domainPadded);
+  const domain_idx = domain_idx_num.toString()
 
   const address = bytesToBigInt(fromHex(eth_address)).toString();
   const address_plus_one = (
@@ -180,11 +247,14 @@ export async function getCircuitInputs(
 
   const circuitInputs = {
     message,
+    payload,
     modulus,
     signature,
     message_padded_bytes,
     address,
     address_plus_one,
+    domain_idx,
+    domain
   };
   return {
     circuitInputs,
