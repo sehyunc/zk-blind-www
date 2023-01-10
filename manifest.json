@@ -1,0 +1,15 @@
+{
+    "name": "JWT for zk-blind",
+    "version": "0.0.1",
+    "description": "Get JWT token for zk-blind",
+    "icons": { },
+    "default_locale": "en",
+    "permissions": [
+      "storage"
+    ],
+    "browser_action": {
+        "default_popup": "index.html",
+        "default_title": "Open to get JWT"
+    },
+    "manifest_version": 3
+  }

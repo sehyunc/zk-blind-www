@@ -50,11 +50,11 @@ export default async function handler(
 ) {
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     input,
-    "/Users/sehyun/code/zk-email-verify/src/helpers/hash.wasm",
-    "/Users/sehyun/code/zk-email-verify/src/helpers/hash.zkey"
+    "/Users/kayleegeorge/code/zk/zk-blind/build/jwt/jwt_js/jwt.wasm",
+    "/Users/kayleegeorge/code/zk/zk-blind/build/jwt/jwt_single.zkey"
   );
-  // console.log("proof", proof);
-  // console.log("publicSignals", publicSignals);
+  console.log("proof", proof);
+  console.log("publicSignals", publicSignals);
 
   const data = await readContract({
     address: "0x7a0fFBF0bd9032Baa4ecF06541BfE422B9f62978",
