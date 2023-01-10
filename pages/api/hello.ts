@@ -53,8 +53,8 @@ export default async function handler(
 		'/Users/sehyun/code/zk-email-verify/src/helpers/hash.wasm',
 		'/Users/sehyun/code/zk-email-verify/src/helpers/hash.zkey'
 	)
-	console.log('proof', proof)
-	console.log('publicSignals', publicSignals)
+	// console.log('proof', proof)
+	// console.log('publicSignals', publicSignals)
 
 	const newArgs = [
 		[
@@ -119,18 +119,25 @@ export default async function handler(
 		['0x2323966c7385a437ec039864aa44a153587a402717f8bfe53741eb490f9935c8']
 	]
 
-	const data = await readContract({
-		address: '0xF545e558E137C1C52fcE3Ea528E045462a9C3641',
-		abi,
-		functionName: 'verifyProof',
-		args: newArgs
-	})
+	// const data = await readContract({
+	// 	address: '0xF545e558E137C1C52fcE3Ea528E045462a9C3641',
+	// 	abi,
+	// 	functionName: 'verifyProof',
+	// 	args: newArgs
+	// })
 	// console.log("🚀 ~ data", data);
-	const inputs = await fetch('http://localhost:3000/api/generate-input', {
+	const body = {
+		signature:
+			'mLCysHQtDftfFey4F-ntFma22r5-qpxtkXsiDw6TY30Tnoj2kPQ_YdSjzagrwRgF7pHE8SSM_roo2wDh3c_8vDNRZeax4VICZjYmPS-3ZWAV0XyjjlgWgFleTqVT72M-VlPCdecHiYQJojlYHJyGybvTCaX1cqoF9aAMy8wBvRbSceECmX15k4nKG51Z5Le7k_vOShaxYmwrRhMIip4KRv-DW1FXAdi_F-MYSrqZ6Oq-nglMujxD2NOoHoqOqmyd1OMIrc6oIRuRqBXlRnQ0IdUDQbiXfyFVC0ItIME3a4SLoWp_rrmY1tSrGJu93MZrjhzfkNglJ-FOp4kKZAKkzA',
+		msg: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJzZWh5dW5AYmVya2VsZXkuZWR1IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImdlb2lwX2NvdW50cnkiOiJVUyJ9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXIta1dMaXBzT3dMZFd4MXdMc0I3clR3UnFlIn0sImlzcyI6Imh0dHBzOi8vYXV0aDAub3BlbmFpLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNjYwOTg2MjEwMzkxMTMwNjgwNyIsImF1ZCI6WyJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxIiwiaHR0cHM6Ly9vcGVuYWkuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTY3MzE1NTQ0NiwiZXhwIjoxNjczNzYwMjQ2LCJhenAiOiJUZEpJY2JlMTZXb1RIdE45NW55eXdoNUU0eU9vNkl0RyIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgbW9kZWwucmVhZCBtb2RlbC5yZXF1ZXN0IG9yZ2FuaXphdGlvbi5yZWFkIG9mZmxpbmVfYWNjZXNzIn0',
+		ethAddress: '0x0000000000000000000000000000000000000000'
+	}
+	const inputs = await fetch('http://localhost:3000/api/generate', {
 		method: 'POST',
-		body: JSON.stringify({ a: 1, b: 'Textual content' })
+		body: JSON.stringify(body)
 	}).then(res => res.json())
-	// console.log(inputs);
+	console.log('🚀 ~ inputs', inputs)
+	const data = false
 
 	res.status(200).json({ valid: data as boolean })
 }
