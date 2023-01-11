@@ -1,4 +1,11 @@
-import { Button, Container, Flex, Spinner, Textarea } from '@chakra-ui/react'
+import {
+	Button,
+	Container,
+	Flex,
+	Spinner,
+	Text,
+	Textarea
+} from '@chakra-ui/react'
 import { Inter } from '@next/font/google'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Head from 'next/head'
@@ -9,20 +16,6 @@ import { useWindowSize } from 'usehooks-ts'
 import Confetti from 'react-confetti'
 
 const inter = Inter({ subsets: ['latin'] })
-const arr = [
-	1039819274958841503552777425237411969, 2393925418941457468536305535389088567,
-	513505235307821578406185944870803528, 31648688809132041103725691608565945,
-	1118227280248002501343932784260195348, 1460752189656646928843376724380610733,
-	2494690879775849992239868627264129920, 499770848099786006855805824914661444,
-	117952129670880907578696311220260862, 594599095806595023021313781486031656,
-	1954215709028388479536967672374066621, 275858127917207716435784616531223795,
-	2192832134592444363563023272016397664, 1951765503135207318741689711604628857,
-	679054217888353607009053133437382225, 831007028401303788228965296099949363,
-	4456647917934998006260668783660427,
-	33252220187286603212636082899505641338322157969, 98, 101, 114, 107, 101, 108,
-	101, 121, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-]
-console.log(arr[18])
 
 export default function Home() {
 	const [enabled, setEnabled] = useState(false)
@@ -58,8 +51,9 @@ export default function Home() {
 	// console.log("🚀 ~ Home ~ data", data);
 	const [token, setToken] = useState('')
 	const [proof, setProof] = useState('')
-	const [publicInputs, setPublicSignals] = useState('')
+	const [publicInputs, setPublicSignals] = useState<string[]>([])
 	console.log('🚀 ~ Home ~ publicInputs', publicInputs)
+	// console.log('🚀 ~ Home ~ publicInputs', publicInputs)
 	const router = useRouter()
 	const msg = router.query.msg
 	const { address } = useAccount()
@@ -67,6 +61,18 @@ export default function Home() {
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [isGenerated, setIsGenerated] = useState(false)
 	const [isVerified, setIsVerified] = useState(false)
+	const [domain, setDomain] = useState('')
+	console.log('🚀 ~ Home ~ domain', domain)
+
+	useEffect(() => {
+		if (publicInputs) {
+			setDomain(
+				String.fromCharCode(
+					...publicInputs.slice(18, 26).map((x: any) => parseInt(x, 10))
+				)
+			)
+		}
+	}, [publicInputs])
 
 	useEffect(() => {
 		if (!token && msg) {
@@ -86,7 +92,7 @@ export default function Home() {
 			setIsGenerating(false)
 			return res.json()
 		})
-		console.log('🚀 ~ handleGenerate ~ proveOutput', proveOutput)
+		// console.log('🚀 ~ handleGenerate ~ proveOutput', proveOutput)
 		if (proveOutput.proof && proveOutput.publicSignals) {
 			setProof(proveOutput.proof)
 			setPublicSignals(proveOutput.publicSignals)
@@ -112,7 +118,7 @@ export default function Home() {
 		}
 	}, [proof, publicInputs])
 
-	console.log('🚀 ~ Home ~ token', token)
+	// console.log('🚀 ~ Home ~ token', token)
 	const { width, height } = useWindowSize()
 	return (
 		<>
@@ -155,8 +161,9 @@ export default function Home() {
 							loadingText="Generating"
 							isDisabled={isGenerated}
 						>
-							Generate Proofs and Inputs
+							{isGenerated ? 'Generated' : 'Generate Proof and Inputs'}
 						</Button>
+						{domain && <Text>Proved you belong to {domain}!</Text>}
 						<Textarea
 							value={!!proof ? JSON.stringify(proof) : ''}
 							size="lg"
@@ -164,7 +171,7 @@ export default function Home() {
 							_placeholder={{ color: '#992870' }}
 						/>
 						<Textarea
-							value={publicInputs}
+							value={publicInputs.toString()}
 							size="lg"
 							placeholder="Waiting for public input generation"
 							_placeholder={{ color: '#992870' }}
@@ -179,7 +186,7 @@ export default function Home() {
 						>
 							Verify
 						</Button>
-						<p>{isVerified ? 'Valid' : 'Invalid'}</p>
+						<p>{isGenerated && isVerified && 'Proof and Inputs Valid!'}</p>
 					</Flex>
 				</Container>
 			</main>
