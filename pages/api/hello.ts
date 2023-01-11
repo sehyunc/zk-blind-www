@@ -27,83 +27,6 @@ type Data = {
 	valid: boolean
 }
 
-// const proof = {
-// 	pi_a: [
-// 		'21684543712346149336945579785111148452484684882908615390826170328498464061696',
-// 		'12969636048626817418044544862491129779818483483607026062359193601639175618730',
-// 		'1'
-// 	],
-// 	pi_b: [
-// 		[
-// 			'21316386912667274728641362008693099180021104306016237208754399251127373242349',
-// 			'4832807613699409895367188134689823022469698354720792115669324503818450008724'
-// 		],
-// 		[
-// 			'12865986372984852942067359958171097831867331402014925421782942646790114426055',
-// 			'4427509559524262782760694266231057689301928396221937474310506190152370858785'
-// 		],
-// 		['1', '0']
-// 	],
-// 	pi_c: [
-// 		'2440492644936448284791818487544474453511180927389533306729304290952012309893',
-// 		'18014680953560049843595898805757883156853974298991908416765090444665238446025',
-// 		'1'
-// 	],
-// 	protocol: 'groth16',
-// 	curve: 'bn128'
-// }
-
-// const publicSignals = [
-// 	'1039819274958841503552777425237411969',
-// 	'2393925418941457468536305535389088567',
-// 	'513505235307821578406185944870803528',
-// 	'31648688809132041103725691608565945',
-// 	'1118227280248002501343932784260195348',
-// 	'1460752189656646928843376724380610733',
-// 	'2494690879775849992239868627264129920',
-// 	'499770848099786006855805824914661444',
-// 	'117952129670880907578696311220260862',
-// 	'594599095806595023021313781486031656',
-// 	'1954215709028388479536967672374066621',
-// 	'275858127917207716435784616531223795',
-// 	'2192832134592444363563023272016397664',
-// 	'1951765503135207318741689711604628857',
-// 	'679054217888353607009053133437382225',
-// 	'831007028401303788228965296099949363',
-// 	'4456647917934998006260668783660427',
-// 	'0',
-// 	'98',
-// 	'101',
-// 	'114',
-// 	'107',
-// 	'101',
-// 	'108',
-// 	'101',
-// 	'121',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0',
-// 	'0'
-// ]
-
 export async function verifyProof(proof: any, publicSignals: any) {
 	const proofVerified = await snarkjs.groth16.verify(vkey, publicSignals, proof)
 	return proofVerified
@@ -113,15 +36,25 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<Data>
 ) {
-	const body = {
-		signature:
-			'mLCysHQtDftfFey4F-ntFma22r5-qpxtkXsiDw6TY30Tnoj2kPQ_YdSjzagrwRgF7pHE8SSM_roo2wDh3c_8vDNRZeax4VICZjYmPS-3ZWAV0XyjjlgWgFleTqVT72M-VlPCdecHiYQJojlYHJyGybvTCaX1cqoF9aAMy8wBvRbSceECmX15k4nKG51Z5Le7k_vOShaxYmwrRhMIip4KRv-DW1FXAdi_F-MYSrqZ6Oq-nglMujxD2NOoHoqOqmyd1OMIrc6oIRuRqBXlRnQ0IdUDQbiXfyFVC0ItIME3a4SLoWp_rrmY1tSrGJu93MZrjhzfkNglJ-FOp4kKZAKkzA',
-		msg: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJzZWh5dW5AYmVya2VsZXkuZWR1IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImdlb2lwX2NvdW50cnkiOiJVUyJ9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXIta1dMaXBzT3dMZFd4MXdMc0I3clR3UnFlIn0sImlzcyI6Imh0dHBzOi8vYXV0aDAub3BlbmFpLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNjYwOTg2MjEwMzkxMTMwNjgwNyIsImF1ZCI6WyJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxIiwiaHR0cHM6Ly9vcGVuYWkuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTY3MzE1NTQ0NiwiZXhwIjoxNjczNzYwMjQ2LCJhenAiOiJUZEpJY2JlMTZXb1RIdE45NW55eXdoNUU0eU9vNkl0RyIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgbW9kZWwucmVhZCBtb2RlbC5yZXF1ZXN0IG9yZ2FuaXphdGlvbi5yZWFkIG9mZmxpbmVfYWNjZXNzIn0',
-		ethAddress: '0x0000000000000000000000000000000000000000'
+	const { body } = req
+	const b = JSON.parse(body)
+	const token = b.token
+	const splitToken = token.split('.')
+	const bodyInit = {
+		signature: splitToken[2],
+		msg: splitToken[0] + '.' + splitToken[1],
+		ethAddress: b.address
 	}
+
+	// const body = {
+	// 	signature:
+	// 		'mLCysHQtDftfFey4F-ntFma22r5-qpxtkXsiDw6TY30Tnoj2kPQ_YdSjzagrwRgF7pHE8SSM_roo2wDh3c_8vDNRZeax4VICZjYmPS-3ZWAV0XyjjlgWgFleTqVT72M-VlPCdecHiYQJojlYHJyGybvTCaX1cqoF9aAMy8wBvRbSceECmX15k4nKG51Z5Le7k_vOShaxYmwrRhMIip4KRv-DW1FXAdi_F-MYSrqZ6Oq-nglMujxD2NOoHoqOqmyd1OMIrc6oIRuRqBXlRnQ0IdUDQbiXfyFVC0ItIME3a4SLoWp_rrmY1tSrGJu93MZrjhzfkNglJ-FOp4kKZAKkzA',
+	// 	msg: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJzZWh5dW5AYmVya2VsZXkuZWR1IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImdlb2lwX2NvdW50cnkiOiJVUyJ9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXIta1dMaXBzT3dMZFd4MXdMc0I3clR3UnFlIn0sImlzcyI6Imh0dHBzOi8vYXV0aDAub3BlbmFpLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNjYwOTg2MjEwMzkxMTMwNjgwNyIsImF1ZCI6WyJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxIiwiaHR0cHM6Ly9vcGVuYWkuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTY3MzE1NTQ0NiwiZXhwIjoxNjczNzYwMjQ2LCJhenAiOiJUZEpJY2JlMTZXb1RIdE45NW55eXdoNUU0eU9vNkl0RyIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgbW9kZWwucmVhZCBtb2RlbC5yZXF1ZXN0IG9yZ2FuaXphdGlvbi5yZWFkIG9mZmxpbmVfYWNjZXNzIn0',
+	// 	ethAddress: '0x0000000000000000000000000000000000000000'
+	// }
 	const inputs = await fetch('http://localhost:3000/api/generate', {
 		method: 'POST',
-		body: JSON.stringify(body)
+		body: JSON.stringify(bodyInit)
 	}).then(res => res.json())
 
 	console.log('🚀 ~ inputs', inputs)
@@ -133,13 +66,12 @@ export default async function handler(
 	)
 	console.log('proof', proof)
 	console.log('publicSignals', publicSignals)
-	const proofJson = JSON.stringify(proof)
-	const publicSignalsJson = JSON.stringify(publicSignals)
 
 	const isVerified = await verifyProof(proof, publicSignals)
 	console.log('🚀 ~ isVerified', isVerified)
 
 	res.status(200).json({ valid: isVerified })
+	// res.status(200).json({ valid: false })
 }
 
 // const abi = [

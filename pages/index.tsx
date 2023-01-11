@@ -1,9 +1,9 @@
 import { Inter } from '@next/font/google'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useContractRead } from 'wagmi'
+import { useContractRead, useAccount } from 'wagmi'
 import VerifierAbi from '../constants/abi/verifier.abi.json'
 // import { generateProof } from "../helpers/zkp";
 import { Button, Container, Flex, Input, Textarea } from '@chakra-ui/react'
@@ -45,12 +45,23 @@ export default function Home() {
 	const [token, setToken] = useState('')
 	const router = useRouter()
 	const msg = router.query.msg
+	const { address } = useAccount()
 
 	useEffect(() => {
 		if (!token && msg) {
 			setToken(msg.toString())
 		}
 	}, [msg, token])
+
+	const handleVerify = useCallback(async () => {
+		const inputs = await fetch('http://localhost:3000/api/hello', {
+			method: 'POST',
+			body: JSON.stringify({
+				token,
+				address
+			})
+		}).then(res => res.json())
+	}, [address, token])
 
 	console.log('🚀 ~ Home ~ token', token)
 	return (
@@ -85,7 +96,11 @@ export default function Home() {
 							placeholder="Paste your JWT here"
 							_placeholder={{ color: '#992870' }}
 						/>
-						<Button backgroundColor="#992870" variant="solid">
+						<Button
+							backgroundColor="#992870"
+							onClick={handleVerify}
+							variant="solid"
+						>
 							Verify
 						</Button>
 					</Flex>
