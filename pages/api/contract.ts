@@ -1,0 +1,105 @@
+// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import type { NextApiRequest, NextApiResponse } from 'next'
+import { vkey } from './constants/vkey'
+const snarkjs = require('snarkjs')
+import {
+	configureChains,
+	createClient,
+	goerli,
+	readContract
+} from '@wagmi/core'
+import { InjectedConnector } from '@wagmi/core/connectors/injected'
+import { publicProvider } from '@wagmi/core/providers/public'
+
+const { chains, provider, webSocketProvider } = configureChains(
+	[goerli],
+	[publicProvider()]
+)
+
+const client = createClient({
+	autoConnect: true,
+	connectors: [new InjectedConnector({ chains })],
+	provider,
+	webSocketProvider
+})
+
+type Data = {
+	isVerified: boolean
+}
+const newArgs = [
+	[
+		'0x301baee8285e9861a01a4ac309b1aa5afae52553ff57d1161a38bb33c44292c2',
+		'0x2dd313fbff534049064bab83c2d905d3587070d3d18f1dde7d1fe68f40ebcbcb'
+	],
+	[
+		[
+			'0x2734cf04cb8bc58069da1a0ef353d6a9990a5fc674ca67287dd8521a2c7caad1',
+			'0x2ad69322a693dc616b8e74d3f64cb7e9e69309dd9f628a1a83e374c5731cd413'
+		],
+		[
+			'0x1b147a43a077eacc91a50faa0a236b9a98f102428db39839f74942e76256892f',
+			'0x08f0ad2f8b81a92be449117b5683bc4b4470813ed52f25d2daa3bb7547a18951'
+		]
+	],
+	[
+		'0x0c31e4b39873d285d0a0083da184d275e66835f03a845fc04c942c97a4091cf9',
+		'0x2044e2da5d7628a1101f0c1f5df44969f5e9cdc78255d3d89183468a179a1745'
+	],
+	[
+		'0x0000000000000000000000000000000000c8430c6464e64ddda07a9b863d8881',
+		'0x0000000000000000000000000000000001cd0da2c4ae4218b0cade824b613b37',
+		'0x000000000000000000000000000000000062e5c346b31c47a050182d2eafd848',
+		'0x00000000000000000000000000000000000618669ce3a3538eaddc8d6ced08b9',
+		'0x0000000000000000000000000000000000d75cdc8d790c81ab9c23625464a414',
+		'0x00000000000000000000000000000000011954a4b6d45c95fa48f63ffec9f0ad',
+		'0x0000000000000000000000000000000001e075c1b0cf7069eac655ee53f6cb80',
+		'0x000000000000000000000000000000000060409af02b53bf34965950c557a044',
+		'0x000000000000000000000000000000000016b77d2e3917ea5af4e7363a68cffe',
+		'0x00000000000000000000000000000000007283ffb204c691aaf1bce0ac279328',
+		'0x0000000000000000000000000000000001785e45f8b6da078bb330084a557dbd',
+		'0x00000000000000000000000000000000003520db147c498f546c95853efc64f3',
+		'0x0000000000000000000000000000000001a652f8aede242fe83a7af1091cc560',
+		'0x000000000000000000000000000000000177e578067b3fc1873b4838e2597d79',
+		'0x000000000000000000000000000000000082c7f533459aff65a02e6f635fae51',
+		'0x0000000000000000000000000000000000a00bcf4e84dc9a972a8eab541dfb33',
+		'0x000000000000000000000000000000000000dbbace12b0ce3ef3dcde63800d8b',
+		'0x0000000000000000000000000000000000000000000000000000000000000000'
+	]
+]
+
+export async function verifyProof(proof: any, publicSignals: any) {
+	const proofVerified = await snarkjs.groth16.verify(vkey, publicSignals, proof)
+	return proofVerified
+}
+
+export default async function handler(
+	req: NextApiRequest,
+	res: NextApiResponse<Data>
+) {
+	const abi = [
+		{
+			inputs: [
+				{ internalType: 'uint256[2]', name: 'a', type: 'uint256[2]' },
+				{ internalType: 'uint256[2][2]', name: 'b', type: 'uint256[2][2]' },
+				{ internalType: 'uint256[2]', name: 'c', type: 'uint256[2]' },
+				{ internalType: 'uint256[1]', name: 'input', type: 'uint256[1]' }
+			],
+			name: 'verifyProof',
+			outputs: [{ internalType: 'bool', name: 'r', type: 'bool' }],
+			stateMutability: 'view',
+			type: 'function'
+		}
+	]
+	const data = await readContract({
+		address: '0xF545e558E137C1C52fcE3Ea528E045462a9C3641',
+		abi,
+		functionName: 'verifyProof',
+		args: newArgs
+	})
+	console.log('🚀 ~ data', data)
+
+	const { body } = req
+	const b = JSON.parse(body)
+
+	res.status(200).json({ isVerified: false })
+}

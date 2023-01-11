@@ -24,12 +24,9 @@ const client = createClient({
 })
 
 type Data = {
-	valid: boolean
-}
-
-export async function verifyProof(proof: any, publicSignals: any) {
-	const proofVerified = await snarkjs.groth16.verify(vkey, publicSignals, proof)
-	return proofVerified
+	proof: any
+	publicSignals: any
+	// valid: boolean
 }
 
 export default async function handler(
@@ -67,10 +64,14 @@ export default async function handler(
 	console.log('proof', proof)
 	console.log('publicSignals', publicSignals)
 
-	const isVerified = await verifyProof(proof, publicSignals)
-	console.log('🚀 ~ isVerified', isVerified)
+	// const isVerified = await verifyProof(proof, publicSignals)
+	// console.log('🚀 ~ isVerified', isVerified)
 
-	res.status(200).json({ valid: isVerified })
+	res.status(200).json({
+		proof,
+		publicSignals
+		// valid: isVerified
+	})
 	// res.status(200).json({ valid: false })
 }
 

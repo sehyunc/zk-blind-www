@@ -1,14 +1,28 @@
+import { Button, Container, Flex, Spinner, Textarea } from '@chakra-ui/react'
 import { Inter } from '@next/font/google'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Head from 'next/head'
-import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useContractRead, useAccount } from 'wagmi'
-import VerifierAbi from '../constants/abi/verifier.abi.json'
-// import { generateProof } from "../helpers/zkp";
-import { Button, Container, Flex, Input, Textarea } from '@chakra-ui/react'
+import { useCallback, useEffect, useState } from 'react'
+import { useAccount } from 'wagmi'
+import { useWindowSize } from 'usehooks-ts'
+import Confetti from 'react-confetti'
 
 const inter = Inter({ subsets: ['latin'] })
+const arr = [
+	1039819274958841503552777425237411969, 2393925418941457468536305535389088567,
+	513505235307821578406185944870803528, 31648688809132041103725691608565945,
+	1118227280248002501343932784260195348, 1460752189656646928843376724380610733,
+	2494690879775849992239868627264129920, 499770848099786006855805824914661444,
+	117952129670880907578696311220260862, 594599095806595023021313781486031656,
+	1954215709028388479536967672374066621, 275858127917207716435784616531223795,
+	2192832134592444363563023272016397664, 1951765503135207318741689711604628857,
+	679054217888353607009053133437382225, 831007028401303788228965296099949363,
+	4456647917934998006260668783660427,
+	33252220187286603212636082899505641338322157969, 98, 101, 114, 107, 101, 108,
+	101, 121, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+]
+console.log(arr[18])
 
 export default function Home() {
 	const [enabled, setEnabled] = useState(false)
@@ -43,9 +57,16 @@ export default function Home() {
 	// console.log("🚀 ~ Home ~ isError", isError);
 	// console.log("🚀 ~ Home ~ data", data);
 	const [token, setToken] = useState('')
+	const [proof, setProof] = useState('')
+	const [publicInputs, setPublicSignals] = useState('')
+	console.log('🚀 ~ Home ~ publicInputs', publicInputs)
 	const router = useRouter()
 	const msg = router.query.msg
 	const { address } = useAccount()
+	const [isVerifying, setIsVerifying] = useState(false)
+	const [isGenerating, setIsGenerating] = useState(false)
+	const [isGenerated, setIsGenerated] = useState(false)
+	const [isVerified, setIsVerified] = useState(false)
 
 	useEffect(() => {
 		if (!token && msg) {
@@ -53,17 +74,46 @@ export default function Home() {
 		}
 	}, [msg, token])
 
-	const handleVerify = useCallback(async () => {
-		const inputs = await fetch('http://localhost:3000/api/hello', {
+	const handleGenerate = useCallback(async () => {
+		setIsGenerating(true)
+		const proveOutput = await fetch('http://localhost:3000/api/hello', {
 			method: 'POST',
 			body: JSON.stringify({
 				token,
 				address
 			})
-		}).then(res => res.json())
+		}).then(res => {
+			setIsGenerating(false)
+			return res.json()
+		})
+		console.log('🚀 ~ handleGenerate ~ proveOutput', proveOutput)
+		if (proveOutput.proof && proveOutput.publicSignals) {
+			setProof(proveOutput.proof)
+			setPublicSignals(proveOutput.publicSignals)
+			setIsGenerated(true)
+		}
 	}, [address, token])
 
+	const handleVerify = useCallback(async () => {
+		setIsVerifying(true)
+		const res = await fetch('http://localhost:3000/api/verify', {
+			method: 'POST',
+			body: JSON.stringify({
+				proof,
+				publicInputs
+			})
+		}).then(res => {
+			setIsVerifying(false)
+			return res.json()
+		})
+		console.log('🚀 ~ handleVerify ~ res', res)
+		if (res.isVerified) {
+			setIsVerified(true)
+		}
+	}, [proof, publicInputs])
+
 	console.log('🚀 ~ Home ~ token', token)
+	const { width, height } = useWindowSize()
 	return (
 		<>
 			<Head>
@@ -73,6 +123,7 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<main>
+				{isVerified && <Confetti width={width} height={height} />}
 				<Container
 					as={Flex}
 					centerContent
@@ -98,11 +149,37 @@ export default function Home() {
 						/>
 						<Button
 							backgroundColor="#992870"
+							onClick={handleGenerate}
+							variant="solid"
+							isLoading={isGenerating}
+							loadingText="Generating"
+							isDisabled={isGenerated}
+						>
+							Generate Proofs and Inputs
+						</Button>
+						<Textarea
+							value={!!proof ? JSON.stringify(proof) : ''}
+							size="lg"
+							placeholder="Waiting for proof generation"
+							_placeholder={{ color: '#992870' }}
+						/>
+						<Textarea
+							value={publicInputs}
+							size="lg"
+							placeholder="Waiting for public input generation"
+							_placeholder={{ color: '#992870' }}
+						/>
+						<Button
+							backgroundColor="#992870"
 							onClick={handleVerify}
 							variant="solid"
+							isLoading={isVerifying}
+							loadingText="Verifying"
+							isDisabled={!isGenerated || isVerified}
 						>
 							Verify
 						</Button>
+						<p>{isVerified ? 'Valid' : 'Invalid'}</p>
 					</Flex>
 				</Container>
 			</main>
