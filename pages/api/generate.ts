@@ -20,6 +20,7 @@ export default async function handler(
 ) {
 	const { body } = req
 	const b = JSON.parse(body)
+	console.log("CHECK THERE", b)
 
 	const data = await generate_inputs(b.signature, b.msg, b.ethAddress)
 	// const data = await generate_inputs()
