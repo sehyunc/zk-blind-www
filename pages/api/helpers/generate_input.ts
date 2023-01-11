@@ -16,12 +16,10 @@ export async function generate_inputs(
 	console.log('🚀 ~ signature', signature)
 	const sig = BigInt('0x' + Buffer.from(signature, 'base64').toString('hex'))
 	const message = Buffer.from(msg)
-	const payload_idx = msg.indexOf('.') + 1
-	const payload_raw = msg.substring(payload_idx)
-	const payload = Buffer.from(payload_raw)
+	const period_idx_num = BigInt(msg.indexOf('.'))
 
 	const { domain: domainStr, domain_idx: domain_index } =
-		findDomain(payload_raw)
+		findDomain(msg)
 	const domain = Buffer.from(domainStr ?? '')
 	const domain_idx_num = BigInt(domain_index ?? 0)
 
@@ -36,9 +34,9 @@ export async function generate_inputs(
 		sig,
 		modulus,
 		message,
-		payload,
 		ethAddress,
 		circuitType,
+		period_idx_num,
 		domain_idx_num,
 		domain
 	)
@@ -48,14 +46,14 @@ export async function generate_inputs(
 
 export interface ICircuitInputs {
 	message?: string[]
-	payload?: string[]
 	modulus?: string[]
 	signature?: string[]
 	address?: string
 	address_plus_one?: string
 	message_padded_bytes?: string
-	domain?: string[]
+	period_idx?: string
 	domain_idx?: string
+	domain?: string[]
 }
 enum CircuitType {
 	RSA = 'rsa',
@@ -173,9 +171,9 @@ export async function getCircuitInputs(
 	rsa_signature: BigInt,
 	rsa_modulus: BigInt,
 	msg: Buffer,
-	payload_raw: Buffer,
 	eth_address: string,
 	circuit: CircuitType,
+	period_idx_num: BigInt,
 	domain_idx_num: BigInt,
 	domain_raw: Buffer
 ): Promise<{
@@ -190,7 +188,6 @@ export async function getCircuitInputs(
 	// Message is the header + payload
 	const prehash_message_string = msg
 	const signatureBigInt = rsa_signature
-	const prehash_payload_string = payload_raw
 
 	// Perform conversions
 	const prehashBytesUnpadded =
@@ -198,19 +195,9 @@ export async function getCircuitInputs(
 			? new TextEncoder().encode(prehash_message_string)
 			: Uint8Array.from(prehash_message_string)
 
-	const payloadBytesUnpadded =
-		typeof prehash_payload_string == 'string'
-			? new TextEncoder().encode(prehash_payload_string)
-			: Uint8Array.from(prehash_payload_string)
-
 	// Sha add padding
 	const [messagePadded, messagePaddedLen] = await sha256Pad(
 		prehashBytesUnpadded,
-		MAX_HEADER_PADDED_BYTES
-	)
-
-	const [payloadPadded, payloadPaddedLen] = await sha256Pad(
-		payloadBytesUnpadded,
 		MAX_HEADER_PADDED_BYTES
 	)
 
@@ -240,7 +227,7 @@ export async function getCircuitInputs(
 	const message_padded_bytes = messagePaddedLen.toString()
 	const message = await Uint8ArrayToCharArray(messagePadded) // Packed into 1 byte signals
 	const domain = await Uint8ArrayToCharArray(domainPadded)
-	const payload = await Uint8ArrayToCharArray(payloadPadded)
+	const period_idx = period_idx_num.toString()
 	const domain_idx = domain_idx_num.toString()
 
 	const address = bytesToBigInt(fromHex(eth_address)).toString()
@@ -248,12 +235,12 @@ export async function getCircuitInputs(
 
 	const circuitInputs = {
 		message,
-		payload,
 		modulus,
 		signature,
 		message_padded_bytes,
 		address,
 		address_plus_one,
+		period_idx,
 		domain_idx,
 		domain
 	}
