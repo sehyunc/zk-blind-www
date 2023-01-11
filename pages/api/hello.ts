@@ -1,14 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import {
-	configureChains,
-	createClient,
-	goerli,
-	readContract
-} from '@wagmi/core'
+import { configureChains, createClient, goerli } from '@wagmi/core'
 import { InjectedConnector } from '@wagmi/core/connectors/injected'
 import { publicProvider } from '@wagmi/core/providers/public'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { vkey } from './constants/vkey'
 const snarkjs = require('snarkjs')
 
 const { chains, provider, webSocketProvider } = configureChains(
@@ -26,7 +20,6 @@ const client = createClient({
 type Data = {
 	proof: any
 	publicSignals: any
-	// valid: boolean
 }
 
 export default async function handler(
@@ -64,15 +57,10 @@ export default async function handler(
 	console.log('proof', proof)
 	console.log('publicSignals', publicSignals)
 
-	// const isVerified = await verifyProof(proof, publicSignals)
-	// console.log('🚀 ~ isVerified', isVerified)
-
 	res.status(200).json({
 		proof,
 		publicSignals
-		// valid: isVerified
 	})
-	// res.status(200).json({ valid: false })
 }
 
 // const abi = [
