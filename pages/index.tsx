@@ -1,7 +1,8 @@
 import { Inter } from '@next/font/google'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Head from 'next/head'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 import { useContractRead } from 'wagmi'
 import VerifierAbi from '../constants/abi/verifier.abi.json'
 // import { generateProof } from "../helpers/zkp";
@@ -42,6 +43,15 @@ export default function Home() {
 	// console.log("🚀 ~ Home ~ isError", isError);
 	// console.log("🚀 ~ Home ~ data", data);
 	const [token, setToken] = useState('')
+	const router = useRouter()
+	const msg = router.query.msg
+
+	useEffect(() => {
+		if (!token && msg) {
+			setToken(msg.toString())
+		}
+	}, [msg, token])
+
 	console.log('🚀 ~ Home ~ token', token)
 	return (
 		<>

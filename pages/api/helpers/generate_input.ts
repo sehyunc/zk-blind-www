@@ -27,7 +27,7 @@ export async function generate_inputs(
 
 	const circuitType = CircuitType.JWT
 	const pubkey = fs.readFileSync(
-		'/Users/kayleegeorge/code/zk/zk-blind-www/pages/api/helpers/public_key.pem'
+		'/Users/sehyun/code/zk-blind-www/pages/api/helpers/public_key.pem'
 	)
 	const pubKeyData = pki.publicKeyFromPem(pubkey.toString())
 
