@@ -4,23 +4,23 @@ import { vkey } from './constants/vkey'
 const snarkjs = require('snarkjs')
 
 type Data = {
-	isVerified: boolean
+  isVerified: boolean
 }
 
 export async function verifyProof(proof: any, publicSignals: any) {
-	const proofVerified = await snarkjs.groth16.verify(vkey, publicSignals, proof)
-	return proofVerified
+  const proofVerified = await snarkjs.groth16.verify(vkey, publicSignals, proof)
+  return proofVerified
 }
 
 export default async function handler(
-	req: NextApiRequest,
-	res: NextApiResponse<Data>
+  req: NextApiRequest,
+  res: NextApiResponse<Data>
 ) {
-	const { body } = req
-	const b = JSON.parse(body)
-	console.log('🚀 ~ b', b)
-	console.log('🚀 ~ b', b.publicInputs)
+  const { body } = req
+  const b = JSON.parse(body)
+  console.log('🚀 ~ b', b)
+  console.log('🚀 ~ b', b.publicInputs)
 
-	const isVerified = await verifyProof(b.proof, b.publicInputs)
-	res.status(200).json({ isVerified })
+  const isVerified = await verifyProof(b.proof, b.publicInputs)
+  res.status(200).json({ isVerified })
 }

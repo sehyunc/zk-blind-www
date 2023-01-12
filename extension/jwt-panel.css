@@ -9,28 +9,28 @@ td:first-child {
   overflow-wrap: anywhere;
 }
 td:first-child::after {
-  content: ":";
+  content: ':';
 }
 .ts {
   font-style: italic;
   color: firebrick;
 }
 .ts::before {
-  content: " (";
+  content: ' (';
 }
 .ts::after {
-  content: ")";
+  content: ')';
 }
 fieldset {
   border: 2px solid #000;
-  -moz-border-radius:8px;
-  -webkit-border-radius:8px;
-  border-radius:8px;
-  }
+  -moz-border-radius: 8px;
+  -webkit-border-radius: 8px;
+  border-radius: 8px;
+}
 legend {
   color: #000;
   font-size: 1.5em;
-  }
+}
 @media (prefers-color-scheme: dark) {
   * {
     color: silver;
@@ -40,12 +40,16 @@ legend {
     background-color: silver;
     color: #202124;
   }
-  td:first-child { color: darkseagreen; }
-  .ts { color: lightcoral; }
+  td:first-child {
+    color: darkseagreen;
+  }
+  .ts {
+    color: lightcoral;
+  }
   fieldset {
     border: thick solid #494c50;
-    }
+  }
   legend {
     color: #9aa0a5;
-    }
+  }
 }
