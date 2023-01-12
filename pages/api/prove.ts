@@ -57,7 +57,7 @@ export default async function handler(
 
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     data,
-    '/Users/sehyun/Desktop/jwt.wasm',
+    'https://zkemail-zkey-chunks.s3.amazonaws.com/jwt.wasm',
     '/Users/sehyun/Desktop/jwt_single1.zkey'
   )
   console.log('proof', proof)
