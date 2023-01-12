@@ -14,7 +14,7 @@ import { abi } from '../constants/abi'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 
-const Blind = () => {
+const Create = () => {
   const [title, setTitle] = useState('')
   const [message, setMessage] = useState('')
   const { address } = useAccount()
@@ -68,4 +68,4 @@ const Blind = () => {
   )
 }
 
-export default Blind
+export default Create
