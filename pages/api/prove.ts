@@ -53,8 +53,7 @@ export default async function handler(
     bodyInit.msg,
     b.address
   )
-
-  //   console.log('🚀 ~ inputs', inputs)
+  console.log('🚀 ~ data', data)
 
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     data,

@@ -216,10 +216,10 @@ export default async function handler(
 ) {
   const { body } = req
   const parsedBody = JSON.parse(body)
-  //   console.log('🚀 ~ parsedBody', parsedBody)
+  console.log('🚀 ~ parsedBody', parsedBody.proof)
   //   const { a, b, c, inputs } = await exportSolidityCallDataGroth16({ proof: parsedBody.proof, publicSignals: parsedBody.publicSignals });
   const calldata = await exportSolidityCallDataGroth16({
-    proof: JSON.parse(parsedBody.proof),
+    proof: parsedBody.proof,
     publicSignals: parsedBody.publicInputs
   })
   const data = await contract.add(
