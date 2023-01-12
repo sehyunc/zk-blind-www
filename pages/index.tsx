@@ -1,4 +1,11 @@
-import { Button, Container, Flex, Text, Textarea } from '@chakra-ui/react'
+import {
+  Button,
+  Container,
+  Flex,
+  Text,
+  Textarea,
+  useToast
+} from '@chakra-ui/react'
 import { Inter } from '@next/font/google'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Head from 'next/head'
@@ -6,151 +13,305 @@ import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import Confetti from 'react-confetti'
 import { useWindowSize } from 'usehooks-ts'
-import { useAccount } from 'wagmi'
+import { useAccount, useContractRead, useWaitForTransaction } from 'wagmi'
 
 const inter = Inter({ subsets: ['latin'] })
 
+const abi = [
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_verifier',
+        type: 'address'
+      }
+    ],
+    stateMutability: 'nonpayable',
+    type: 'constructor'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256[2]',
+        name: 'a',
+        type: 'uint256[2]'
+      },
+      {
+        internalType: 'uint256[2][2]',
+        name: 'b',
+        type: 'uint256[2][2]'
+      },
+      {
+        internalType: 'uint256[2]',
+        name: 'c',
+        type: 'uint256[2]'
+      },
+      {
+        internalType: 'uint256[48]',
+        name: 'input',
+        type: 'uint256[48]'
+      }
+    ],
+    name: 'add',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address'
+      }
+    ],
+    name: 'companies',
+    outputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'addr',
+        type: 'address'
+      }
+    ],
+    name: 'get',
+    outputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'verifier',
+    outputs: [
+      {
+        internalType: 'contract Verifier',
+        name: '',
+        type: 'address'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  }
+]
+
 export default function Home() {
-	const { address } = useAccount()
-	const router = useRouter()
-	const [domain, setDomain] = useState('')
-	const [isVerifying, setIsVerifying] = useState(false)
-	const [isGenerating, setIsGenerating] = useState(false)
-	const [isGenerated, setIsGenerated] = useState(false)
-	const [isVerified, setIsVerified] = useState(false)
-	const [proof, setProof] = useState('')
-	const [publicInputs, setPublicSignals] = useState<string[]>([])
-	const [token, setToken] = useState('')
-	const { height, width } = useWindowSize()
+  const { address } = useAccount()
+  const router = useRouter()
+  const [domain, setDomain] = useState('')
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isGenerated, setIsGenerated] = useState(false)
+  const [isVerified, setIsVerified] = useState(false)
+  const [proof, setProof] = useState('')
+  const [publicInputs, setPublicSignals] = useState<string[]>([])
+  console.log('🚀 ~ Home ~ publicInputs', publicInputs.length)
+  const [token, setToken] = useState('')
+  const { height, width } = useWindowSize()
+  const [hash, setHash] = useState<`0x${string}`>(
+    '0xf1ee3bd8e7bb42ead82ab53aa2d51c5f3a498ec019177163b9d11342e40d41c7'
+  )
+  const toast = useToast()
+  const { isSuccess: txSuccess } = useWaitForTransaction({
+    // confirmations: 5,
+    hash,
+    enabled: !!hash
+  })
 
-	const msg = router.query.msg
+  const formatProof = useCallback(() => {
+    const p = JSON.parse(proof)
+    console.log('🚀 ~ formatProof ~ p', p)
+    const formattedProof = {
+      //   a: [p.pi_a[0].toString(16), p.pi_a[1].toString(16)],
+      //   b: [
+      //     [p.pi_b[0][1].toString(16), p.pi_b[0][0].toString(16)],
+      //     [p.pi_b[1][1].toString(16), p.pi_b[1][0].toString(16)]
+      //   ],
+      //   c: [p.pi_c[0].toString(16), p.pi_c[1].toString(16)],
+      a: p.pi_a
+    }
+    console.log('🚀 ~ formatProof ~ formattedProof', formattedProof)
+    return formattedProof
+  }, [proof])
 
-	useEffect(() => {
-		if (publicInputs) {
-			setDomain(
-				String.fromCharCode(
-					...publicInputs.slice(18, 26).map((x: any) => parseInt(x, 10))
-				)
-			)
-		}
-	}, [publicInputs])
+  const { data: domainStr } = useContractRead({
+    address: '0x04dc2484cc09c2E1c7496111A18b30878b7d14B2',
+    abi,
+    functionName: 'get',
+    args: ['0x0000000000000000000000000000000000000000'],
+    enabled: txSuccess,
+    onSuccess: data => {
+      if (data) {
+        setDomain(`${data}`)
+      }
+    }
+  })
 
-	useEffect(() => {
-		if (!token && msg) {
-			setToken(msg.toString())
-		}
-	}, [msg, token])
+  const msg = router.query.msg
 
-	const handleGenerate = useCallback(async () => {
-		setIsGenerating(true)
-		const proveOutput = await fetch('http://localhost:3000/api/hello', {
-			method: 'POST',
-			body: JSON.stringify({
-				token,
-				address
-			})
-		}).then(res => {
-			setIsGenerating(false)
-			return res.json()
-		})
-		// console.log('🚀 ~ handleGenerate ~ proveOutput', proveOutput)
-		if (proveOutput.proof && proveOutput.publicSignals) {
-			setProof(proveOutput.proof)
-			setPublicSignals(proveOutput.publicSignals)
-			setIsGenerated(true)
-		}
-	}, [address, token])
+  useEffect(() => {
+    if (txSuccess) {
+    }
+  }, [txSuccess])
 
-	const handleVerify = useCallback(async () => {
-		setIsVerifying(true)
-		const res = await fetch('http://localhost:3000/api/verify', {
-			method: 'POST',
-			body: JSON.stringify({
-				proof,
-				publicInputs
-			})
-		}).then(res => {
-			setIsVerifying(false)
-			return res.json()
-		})
-		console.log('🚀 ~ handleVerify ~ res', res)
-		if (res.isVerified) {
-			setIsVerified(true)
-		}
-	}, [proof, publicInputs])
+  //   useEffect(() => {
+  //     if (publicInputs) {
+  //       setDomain(
+  //         String.fromCharCode(
+  //           ...publicInputs.slice(18, 26).map((x: any) => parseInt(x, 10))
+  //         )
+  //       )
+  //     }
+  //   }, [publicInputs])
 
-	return (
-		<>
-			<Head>
-				<title>zk blind</title>
-				<meta name="description" content="Generated by create next app" />
-				<meta name="viewport" content="width=device-width, initial-scale=1" />
-				<link rel="icon" href="/favicon.ico" />
-			</Head>
-			<main>
-				{isVerified && <Confetti width={width} height={height} />}
-				<Container
-					as={Flex}
-					centerContent
-					gap="6"
-					justifyContent="center"
-					minH="100vh"
-				>
-					<Flex
-						direction="column"
-						alignItems="center"
-						backgroundColor="#241520"
-						padding="8"
-						gap="4"
-						borderRadius="10"
-					>
-						<ConnectButton />
-						<Textarea
-							value={token}
-							onChange={e => setToken(e.target.value)}
-							size="lg"
-							placeholder="Paste your JWT here"
-							_placeholder={{ color: '#992870' }}
-						/>
-						<Button
-							backgroundColor="#992870"
-							onClick={handleGenerate}
-							variant="solid"
-							isLoading={isGenerating}
-							loadingText="Generating"
-							isDisabled={isGenerated}
-						>
-							{isGenerated ? 'Generated' : 'Generate Proof and Inputs'}
-						</Button>
-						{domain && <Text>Proved you belong to {domain}!</Text>}
-						<Textarea
-							value={!!proof ? JSON.stringify(proof) : ''}
-							size="lg"
-							placeholder="Waiting for proof generation"
-							_placeholder={{ color: '#992870' }}
-						/>
-						<Textarea
-							value={publicInputs.toString()}
-							size="lg"
-							placeholder="Waiting for public input generation"
-							_placeholder={{ color: '#992870' }}
-						/>
-						<Button
-							backgroundColor="#992870"
-							onClick={handleVerify}
-							variant="solid"
-							isLoading={isVerifying}
-							loadingText="Verifying"
-							isDisabled={!isGenerated || isVerified}
-						>
-							Verify
-						</Button>
-						<p>{isGenerated && isVerified && 'Proof and Inputs Valid!'}</p>
-					</Flex>
-				</Container>
-			</main>
-		</>
-	)
+  useEffect(() => {
+    if (!token && msg) {
+      setToken(msg.toString())
+    }
+  }, [msg, token])
+
+  const handleVerifyContract = useCallback(async () => {
+    // const hexPublicInputs = publicInputs.map(
+    //   x => `0x${BigInt(x).toString(16).padStart(64, '0')}`
+    // )
+    const res = await fetch('http://localhost:3000/api/contract', {
+      method: 'POST',
+      body: JSON.stringify({ proof, publicInputs })
+    }).then(res => {
+      console.log('🚀 ~ handleVerifyContract ~ res', res)
+      return res.json()
+    })
+    console.log('🚀 ~ res ~ res', res.hash)
+    setHash(res.hash)
+  }, [proof, publicInputs])
+
+  const handleGenerate = useCallback(async () => {
+    setIsGenerating(true)
+    const proveOutput = await fetch('http://localhost:3000/api/prove', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        address
+      })
+    }).then(res => {
+      setIsGenerating(false)
+      return res.json()
+    })
+    // console.log('🚀 ~ handleGenerate ~ proveOutput', proveOutput)
+    if (proveOutput.proof && proveOutput.publicSignals) {
+      setProof(proveOutput.proof)
+      setPublicSignals(proveOutput.publicSignals)
+      setIsGenerated(true)
+    }
+  }, [address, token])
+
+  const handleVerify = useCallback(async () => {
+    setIsVerifying(true)
+    const res = await fetch('http://localhost:3000/api/verify', {
+      method: 'POST',
+      body: JSON.stringify({
+        proof,
+        publicInputs
+      })
+    }).then(res => {
+      setIsVerifying(false)
+      return res.json()
+    })
+    console.log('🚀 ~ handleVerify ~ res', res)
+    if (res.isVerified) {
+      setIsVerified(true)
+    }
+  }, [proof, publicInputs])
+
+  return (
+    <>
+      <Head>
+        <title>zk blind</title>
+        <meta name="description" content="Generated by create next app" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <main>
+        {isVerified && <Confetti width={width} height={height} />}
+        <Container
+          as={Flex}
+          centerContent
+          gap="6"
+          justifyContent="center"
+          minH="100vh"
+        >
+          <Flex
+            direction="column"
+            alignItems="center"
+            backgroundColor="#241520"
+            padding="8"
+            gap="4"
+            borderRadius="10"
+          >
+            <button onClick={formatProof}>get proof</button>
+            <ConnectButton />
+            <Textarea
+              value={token}
+              onChange={e => setToken(e.target.value)}
+              size="lg"
+              placeholder="Paste your JWT here"
+              _placeholder={{ color: '#992870' }}
+            />
+            <Button
+              backgroundColor="#992870"
+              onClick={handleGenerate}
+              variant="solid"
+              isLoading={isGenerating}
+              loadingText="Generating"
+              isDisabled={isGenerated}
+            >
+              {isGenerated ? 'Generated' : 'Generate Proof and Inputs'}
+            </Button>
+            {domain && <Text>Proved you belong to {domain}!</Text>}
+            <Textarea
+              value={!!proof ? JSON.stringify(proof) : ''}
+              size="lg"
+              placeholder="Waiting for proof generation"
+              _placeholder={{ color: '#992870' }}
+            />
+            <Textarea
+              value={publicInputs.toString()}
+              size="lg"
+              placeholder="Waiting for public input generation"
+              _placeholder={{ color: '#992870' }}
+            />
+            <Button
+              backgroundColor="#992870"
+              //   onClick={handleVerify}
+              onClick={handleVerifyContract}
+              variant="solid"
+              isLoading={isVerifying}
+              loadingText="Verifying"
+              //   isDisabled={!isGenerated || isVerified}
+            >
+              Verify
+            </Button>
+            <p>{isGenerated && isVerified && 'Proof and Inputs Valid!'}</p>
+          </Flex>
+        </Container>
+      </main>
+    </>
+  )
 }
 
 // const { data, isError, isLoading } = useContractRead({

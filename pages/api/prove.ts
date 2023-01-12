@@ -4,63 +4,70 @@ import { InjectedConnector } from '@wagmi/core/connectors/injected'
 import { publicProvider } from '@wagmi/core/providers/public'
 import type { NextApiRequest, NextApiResponse } from 'next'
 const snarkjs = require('snarkjs')
+import { generate_inputs } from './helpers/generate_input'
 
 const { chains, provider, webSocketProvider } = configureChains(
-	[goerli],
-	[publicProvider()]
+  [goerli],
+  [publicProvider()]
 )
 
 const client = createClient({
-	autoConnect: true,
-	connectors: [new InjectedConnector({ chains })],
-	provider,
-	webSocketProvider
+  autoConnect: true,
+  connectors: [new InjectedConnector({ chains })],
+  provider,
+  webSocketProvider
 })
 
 type Data = {
-	proof: any
-	publicSignals: any
+  proof: any
+  publicSignals: any
 }
 
 export default async function handler(
-	req: NextApiRequest,
-	res: NextApiResponse<Data>
+  req: NextApiRequest,
+  res: NextApiResponse<Data>
 ) {
-	const { body } = req
-	const b = JSON.parse(body)
-	const token = b.token
-	const splitToken = token.split('.')
-	const bodyInit = {
-		signature: splitToken[2],
-		msg: splitToken[0] + '.' + splitToken[1],
-		ethAddress: b.address
-	}
+  const { body } = req
+  const b = JSON.parse(body)
+  const token = b.token
+  const splitToken = token.split('.')
+  const bodyInit = {
+    signature: splitToken[2],
+    msg: splitToken[0] + '.' + splitToken[1],
+    ethAddress: b.address
+  }
 
-	// const body = {
-	// 	signature:
-	// 		'mLCysHQtDftfFey4F-ntFma22r5-qpxtkXsiDw6TY30Tnoj2kPQ_YdSjzagrwRgF7pHE8SSM_roo2wDh3c_8vDNRZeax4VICZjYmPS-3ZWAV0XyjjlgWgFleTqVT72M-VlPCdecHiYQJojlYHJyGybvTCaX1cqoF9aAMy8wBvRbSceECmX15k4nKG51Z5Le7k_vOShaxYmwrRhMIip4KRv-DW1FXAdi_F-MYSrqZ6Oq-nglMujxD2NOoHoqOqmyd1OMIrc6oIRuRqBXlRnQ0IdUDQbiXfyFVC0ItIME3a4SLoWp_rrmY1tSrGJu93MZrjhzfkNglJ-FOp4kKZAKkzA',
-	// 	msg: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJzZWh5dW5AYmVya2VsZXkuZWR1IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImdlb2lwX2NvdW50cnkiOiJVUyJ9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXIta1dMaXBzT3dMZFd4MXdMc0I3clR3UnFlIn0sImlzcyI6Imh0dHBzOi8vYXV0aDAub3BlbmFpLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNjYwOTg2MjEwMzkxMTMwNjgwNyIsImF1ZCI6WyJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxIiwiaHR0cHM6Ly9vcGVuYWkuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTY3MzE1NTQ0NiwiZXhwIjoxNjczNzYwMjQ2LCJhenAiOiJUZEpJY2JlMTZXb1RIdE45NW55eXdoNUU0eU9vNkl0RyIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgbW9kZWwucmVhZCBtb2RlbC5yZXF1ZXN0IG9yZ2FuaXphdGlvbi5yZWFkIG9mZmxpbmVfYWNjZXNzIn0',
-	// 	ethAddress: '0x0000000000000000000000000000000000000000'
-	// }
-	const inputs = await fetch('http://localhost:3000/api/generate', {
-		method: 'POST',
-		body: JSON.stringify(bodyInit)
-	}).then(res => res.json())
+  // const body = {
+  // 	signature:
+  // 		'mLCysHQtDftfFey4F-ntFma22r5-qpxtkXsiDw6TY30Tnoj2kPQ_YdSjzagrwRgF7pHE8SSM_roo2wDh3c_8vDNRZeax4VICZjYmPS-3ZWAV0XyjjlgWgFleTqVT72M-VlPCdecHiYQJojlYHJyGybvTCaX1cqoF9aAMy8wBvRbSceECmX15k4nKG51Z5Le7k_vOShaxYmwrRhMIip4KRv-DW1FXAdi_F-MYSrqZ6Oq-nglMujxD2NOoHoqOqmyd1OMIrc6oIRuRqBXlRnQ0IdUDQbiXfyFVC0ItIME3a4SLoWp_rrmY1tSrGJu93MZrjhzfkNglJ-FOp4kKZAKkzA',
+  // 	msg: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJzZWh5dW5AYmVya2VsZXkuZWR1IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImdlb2lwX2NvdW50cnkiOiJVUyJ9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXIta1dMaXBzT3dMZFd4MXdMc0I3clR3UnFlIn0sImlzcyI6Imh0dHBzOi8vYXV0aDAub3BlbmFpLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNjYwOTg2MjEwMzkxMTMwNjgwNyIsImF1ZCI6WyJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxIiwiaHR0cHM6Ly9vcGVuYWkuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTY3MzE1NTQ0NiwiZXhwIjoxNjczNzYwMjQ2LCJhenAiOiJUZEpJY2JlMTZXb1RIdE45NW55eXdoNUU0eU9vNkl0RyIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgbW9kZWwucmVhZCBtb2RlbC5yZXF1ZXN0IG9yZ2FuaXphdGlvbi5yZWFkIG9mZmxpbmVfYWNjZXNzIn0',
+  // 	ethAddress: '0x0000000000000000000000000000000000000000'
+  // }
+  //   const inputs = await fetch('http://localhost:3000/api/generate', {
+  //     method: 'POST',
+  //     body: JSON.stringify(bodyInit)
+  //   }).then(res => res.json())
 
-	console.log('🚀 ~ inputs', inputs)
+  const data = await generate_inputs(
+    bodyInit.signature,
+    bodyInit.msg,
+    b.address
+  )
 
-	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-		inputs,
-		'/Users/sehyun/Downloads/jwt.wasm',
-		'/Users/sehyun/Downloads/jwt_single1.zkey'
-	)
-	console.log('proof', proof)
-	console.log('publicSignals', publicSignals)
+  //   console.log('🚀 ~ inputs', inputs)
 
-	res.status(200).json({
-		proof,
-		publicSignals
-	})
+  const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+    data,
+    '/Users/sehyun/Desktop/jwt.wasm',
+    '/Users/sehyun/Desktop/jwt_single1.zkey'
+  )
+  console.log('proof', proof)
+  console.log('publicSignals', publicSignals)
+
+  res.status(200).json({
+    proof,
+    publicSignals
+  })
 }
 
 // const abi = [
