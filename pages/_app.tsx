@@ -1,4 +1,4 @@
-import { ChakraProvider, extendTheme } from '@chakra-ui/react'
+import { Box, ChakraProvider, Container, extendTheme, Flex } from '@chakra-ui/react'
 import {
   darkTheme,
   getDefaultWallets,
@@ -9,6 +9,8 @@ import type { AppProps } from 'next/app'
 import { configureChains, createClient, goerli, WagmiConfig } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import '../styles/globals.css'
+import { Footer } from './components/footer'
+import { Sidebar } from './components/sidebar'
 
 const { chains, provider } = configureChains([goerli], [publicProvider()])
 
@@ -27,7 +29,7 @@ const theme = extendTheme({
   styles: {
     global: () => ({
       body: {
-        bg: '#000'
+        bg: '#131322'
       }
     })
   }
@@ -38,9 +40,18 @@ export default function App({ Component, pageProps }: AppProps) {
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains} theme={darkTheme()}>
         <ChakraProvider theme={theme}>
-          <Component {...pageProps} />
+          <Flex
+          justifyContent='center'
+            flexDirection='row'
+            margin='0 auto'
+            gap='4'
+            >
+            <Sidebar />
+            <Component {...pageProps} />
+          </Flex>
         </ChakraProvider>
       </RainbowKitProvider>
+      <Footer />
     </WagmiConfig>
   )
 }

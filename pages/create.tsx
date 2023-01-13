@@ -7,6 +7,7 @@ import {
   Textarea
 } from '@chakra-ui/react'
 import { Silkscreen } from '@next/font/google'
+
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useEffect, useState } from 'react'
 import {
@@ -19,10 +20,20 @@ import {
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { abi } from '../constants/abi'
 import { createPost, getPosts } from './firebase'
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton
+} from '@chakra-ui/react'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 
-const Create = () => {
+
+const Create = ({ isOpen, onClose }: { isOpen: boolean; onClose: any }) => {
   const [title, setTitle] = useState('')
   const [message, setMessage] = useState('')
   const { address } = useAccount()
@@ -62,45 +73,47 @@ const Create = () => {
       domainStr,
       message,
       address as string,
-      sig as string
+      sig as string,
+      title as string
     )
     // }
   }
-
   return (
-    <Container
-      as={Flex}
-      centerContent
-      gap="6"
-      justifyContent="center"
-      minH="100vh"
-    >
-      <Flex
-        direction="column"
-        alignItems="center"
-        backgroundColor="#241520"
-        padding="8"
-        gap="4"
-        borderRadius="10"
-      >
-        <div>
-          <ConnectButton />
-        </div>
-        <div>
-          <Text>Title</Text>
-          <Input onChange={e => setTitle(e.target.value)} value={title} />
-        </div>
-        <div>
-          <Text>Post</Text>
-          <Textarea
-            onChange={e => setMessage(e.target.value)}
-            value={message}
-          />
-        </div>
-        {/* <div className={font.className}>Committed to {domainStr}</div> */}
-        <Button onClick={handleCreatePost}>Create Post</Button>
-      </Flex>
-    </Container>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay backdropBlur='5px'/>
+      <ModalContent backgroundColor='#1E1E38'>
+        <ModalHeader className={font.className}>Create Post</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody >
+          <Flex
+            direction="column"
+            padding="4"
+            gap="4"
+            borderRadius="10"
+          >
+            {/* <> // taking out title for now
+              <Text>Title</Text>
+              <Input onChange={e => setTitle(e.target.value)} value={title} />
+            </> */}
+            <>
+              <Textarea
+              backgroundColor='#2C2C54'
+                onChange={e => setMessage(e.target.value)}
+                value={message}
+              />
+            </>
+            {/* <div className={font.className}>Committed to {domainStr}</div> */}
+          </Flex>
+        </ModalBody>
+
+        <ModalFooter>
+          {/* <Button mr={3} onClick={onClose}>
+            Close // backgroundColor="#4C82FB" 
+          </Button> */}
+          <Button onClick={handleCreatePost}>Post</Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   )
 }
 

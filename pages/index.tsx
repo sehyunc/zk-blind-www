@@ -18,6 +18,7 @@ import { useAccount, useContractRead, useWaitForTransaction } from 'wagmi'
 import { abi } from '../constants/abi'
 import { Silkscreen } from '@next/font/google'
 import { ArrowForwardIcon } from '@chakra-ui/icons'
+import { Footer } from './components/footer'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 
@@ -197,6 +198,7 @@ export default function Home() {
                 <Button
                   className={font.className}
                   rightIcon={<ArrowForwardIcon />}
+                  onClick={() => router.push('/posts')}
                 >
                   ZKBlind
                 </Button>
