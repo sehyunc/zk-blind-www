@@ -35,6 +35,6 @@
     "wagmi": "^0.10.6"
   },
   "devDependencies": {
-    "snarkjs": "^0.5.0"
+    "snarkjs": "git+https://github.com/sampritipanda/snarkjs.git#fef81fc51d17a734637555c6edbd585ecda02d9e"
   }
 }
