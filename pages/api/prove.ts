@@ -3,6 +3,7 @@ import { configureChains, createClient, goerli } from '@wagmi/core'
 import { InjectedConnector } from '@wagmi/core/connectors/injected'
 import { publicProvider } from '@wagmi/core/providers/public'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { downloadProofFiles } from '../download'
 const snarkjs = require('snarkjs')
 import { generate_inputs } from './helpers/generate_input'
 
@@ -54,6 +55,7 @@ export default async function handler(
     b.address
   )
   console.log('🚀 ~ data', data)
+  await downloadProofFiles('jwt');
 
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     data,

@@ -8,31 +8,175 @@ type Props = {}
 const zkeySuffix = ['b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k']
 const zkeyExtension = ''
 const loadURL = 'https://zkjwt-zkey-chunks.s3.amazonaws.com/'
+const zKeyFile = "jwt_single.zkey";
 
-export async function downloadFromFilename(
-  filename: string,
-  compressed = false
-) {
-  const link = loadURL + filename
-  const uncompressFilePromises = []
+// export async function downloadFromFilename(
+//   filename: string,
+//   compressed = false
+// ) {
+//   const link = loadURL + filename
+//   const uncompressFilePromises = []
+//   try {
+//     const zkeyResp = await fetch(link, {
+//       method: 'GET'
+//     })
+//     const zkeyBuff = await zkeyResp.arrayBuffer()
+//     console.log('🚀 ~ zkeyBuff', zkeyBuff, filename)
+//     if (!compressed) {
+//       await localforage.setItem(filename, zkeyBuff)
+//     } else {
+//       await uncompressAndStore(zkeyBuff, filename)
+//     }
+//     console.log(`Storage of ${filename} successful!`)
+//   } catch (e) {
+//     console.log(
+//       `Storage of ${filename} unsuccessful, make sure IndexedDB is enabled in your browser.`
+//     )
+//   }
+// }
+
+async function downloadFromFilename(filename: string) {
+  const link = loadURL + zKeyFile;
   try {
-    const zkeyResp = await fetch(link, {
-      method: 'GET'
-    })
-    const zkeyBuff = await zkeyResp.arrayBuffer()
-    console.log('🚀 ~ zkeyBuff', zkeyBuff, filename)
-    if (!compressed) {
-      await localforage.setItem(filename, zkeyBuff)
-    } else {
-      await uncompressAndStore(zkeyBuff, filename)
-    }
-    console.log(`Storage of ${filename} successful!`)
+      const zkeyResp = await fetch(link, {
+          method: "GET",
+      });
+      const zkeyBuff = await zkeyResp.arrayBuffer();
+      await localforage.setItem(filename, zkeyBuff);
+      console.log(`Storage of ${filename} successful!`);
   } catch (e) {
-    console.log(
-      `Storage of ${filename} unsuccessful, make sure IndexedDB is enabled in your browser.`
-    )
+      console.log(
+          `Storage of ${filename} unsuccessful, make sure IndexedDB is enabled in your browser.`
+      );
   }
 }
+
+export function bigIntToArray(n: number, k: number, x: bigint) {
+    let divisor = BigInt(1);
+    for (var idx = 0; idx < n; idx++) {
+        divisor = divisor * BigInt(2);
+    }
+
+    let ret = [];
+    var x_temp = BigInt(x);
+    for (var idx = 0; idx < k; idx++) {
+        ret.push(x_temp % divisor);
+        x_temp = x_temp / divisor;
+    }
+    return ret;
+}
+
+// taken from generation code in dizkus-circuits tests
+export function pubkeyToXYArrays(pk: string) {
+    const XArr = bigIntToArray(64, 4, BigInt("0x" + pk.slice(4, 4 + 64))).map(
+        (el) => el.toString()
+    );
+    const YArr = bigIntToArray(64, 4, BigInt("0x" + pk.slice(68, 68 + 64))).map(
+        (el) => el.toString()
+    );
+
+    return [XArr, YArr];
+}
+
+export function sigToRSArrays(sig: string) {
+    const rArr = bigIntToArray(64, 4, BigInt("0x" + sig.slice(2, 2 + 64))).map(
+        (el) => el.toString()
+    );
+    const sArr = bigIntToArray(
+        64,
+        4,
+        BigInt("0x" + sig.slice(66, 66 + 64))
+    ).map((el) => el.toString());
+    return [rArr, sArr];
+}
+
+export function JSONStringifyCustom(val: any) {
+    return JSON.stringify(
+        val,
+        (key, value) => (typeof value === "bigint" ? value.toString() : value) // return everything else unchanged
+    );
+}
+
+export type ProofOutput = {
+    proof: JSON;
+    publicSignals: JSON;
+};
+
+
+
+// chunked
+// export const downloadProofFiles = async function (filename: string) {
+//     const zkeySuffix = ["", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"];
+//     const filePromises = [];
+//     for (const suffix of zkeySuffix) {
+//         const item = await localforage.getItem(${filename}${suffix});
+//         if (item) {
+//             console.log(${filename}${suffix} already exists!);
+//             continue;
+//         }
+//         filePromises.push(downloadFromFilename(${filename}${suffix}));
+//     }
+//     await Promise.all(filePromises);
+// };
+
+// export const prepareProofInputs = async ({
+//     msgHash,
+//     pubKey,
+//     readerAddr,
+//     signature,
+//     nftHolders,
+// }: {
+//     msgHash: string;
+//     pubKey: string;
+//     readerAddr: string;
+//     signature: string;
+//     nftHolders: string[];
+// }): Promise<MembershipProofInputs> => {
+//     const arrMsgHash = bigIntToArray(64, 4, BigInt(msgHash));
+//     const arrPubKey = pubkeyToXYArrays(pubKey);
+//     const [arrR, arrS] = sigToRSArrays(signature);
+
+
+//     //Download proving key
+//     await downloadProofFiles(zKeyFile);
+
+//     //@ts-ignore
+//     const strPathElements = pathElements.map((el: Element) => el.toString());
+//     //@ts-ignore
+//     const strPathIndices = pathIndices.map((el: Element) => el.toString());
+//     const strRoot = pathRoot.toString();
+
+//     const input = {
+//         msghash: arrMsgHash,
+//         pubkey: arrPubKey,
+//         r: arrR,
+//         s: arrS,
+//         pathElements: strPathElements,
+//         pathIndices: strPathIndices,
+//         root: strRoot,
+//     };
+
+//     return input;
+// };
+
+// export const verifyProof = async (proof: JSON, publicSignals: JSON) => {
+//     const vkey = await getVKeys();
+//     const verifiedProof = await snarkjs.groth16.verify(
+//         vkey,
+//         publicSignals,
+//         proof
+//     );
+//     return verifiedProof;
+// };
+
+// async function getVKeys(): Promise<JSON> {
+//     const vkey = JSON.parse(
+//         await (
+//             await axios.get<VKeyRespData>("/api/getVKey")
+//         ).data.vkey
+//     );
+//     return vkey;
+// }
 
 export const downloadProofFiles = async function (filename: string) {
   const filePromises = []
@@ -101,6 +245,7 @@ const uncompressAndStore = async function (
     console.log(`Finished extracting ${filename}`)
   })
 }
+
 
 const Download = (props: Props) => {
   useEffect(() => {

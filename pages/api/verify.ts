@@ -18,8 +18,6 @@ export default async function handler(
 ) {
   const { body } = req
   const b = JSON.parse(body)
-  console.log('🚀 ~ b', b)
-  console.log('🚀 ~ b', b.publicInputs)
 
   const isVerified = await verifyProof(b.proof, b.publicInputs)
   res.status(200).json({ isVerified })

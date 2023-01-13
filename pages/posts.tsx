@@ -18,7 +18,6 @@ import {
 } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { abi } from '../constants/abi'
-import blind from '../constants/blindAbi'
 import { getPosts } from './firebase'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
