@@ -102,7 +102,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC, 5)
 const signer = new ethers.Wallet(process.env.PRIVKEY as any, provider)
 
 const contract = getContract({
-  address: '0x04dc2484cc09c2E1c7496111A18b30878b7d14B2',
+  address: '0x13e4E0a14729d9b7017E77ebbDEad05cb8ad1540',
   abi: abi,
   signerOrProvider: signer
 })

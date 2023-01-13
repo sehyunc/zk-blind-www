@@ -17,8 +17,6 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_MEASUREMENT
 }
 
-console.log(firebaseConfig)
-
 // Initialize Firebase
 // const app = initializeApp(firebaseConfig);
 // const analytics = getAnalytics(app);
@@ -26,10 +24,8 @@ console.log(firebaseConfig)
 // Initialize Firebase
 // firebase.initializeApp(firebaseConfig);
 if (!firebase.apps.length) {
-  console.log('init')
   firebase.initializeApp(firebaseConfig)
 } else {
-  console.log('already init')
   firebase.app() // if already initialized, use that one
 }
 
@@ -37,13 +33,8 @@ const db = firebase.firestore()
 
 // Get all posts
 export async function getPosts() {
-  db.collection('posts')
-    .get()
-    .then(querySnapshot => {
-      querySnapshot.forEach(doc => {
-        console.log(`${doc.id} => ${doc.data()}`)
-      })
-    })
+  const snapshot = await db.collection('posts').get()
+  return snapshot.docs.map(doc => doc.data())
 }
 
 export async function createPost(
@@ -52,7 +43,6 @@ export async function createPost(
   msg: string,
   pubkey: string
 ) {
-  console.log('🚀 ~ id', id)
   db.collection('posts')
     .doc(id)
     .set({

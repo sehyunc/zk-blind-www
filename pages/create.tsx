@@ -19,7 +19,7 @@ import {
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { abi } from '../constants/abi'
 import blind from '../constants/blindAbi'
-import { createPost } from './firebase'
+import { createPost, getPosts } from './firebase'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 
@@ -65,7 +65,6 @@ const Create = () => {
       address as any
       // sig as any
     )
-    console.log('🚀 ~ create ~ post', post)
     // }
   }
 
