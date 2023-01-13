@@ -41,15 +41,16 @@ export async function createPost(
   id: string,
   company: string,
   msg: string,
-  pubkey: string
+  pubkey: string,
+  signature: string
 ) {
   db.collection('posts')
     .doc(id)
     .set({
       company: company,
       msg: msg,
-      pubkey: pubkey
-      // signature: signature
+      pubkey: pubkey,
+      signature: signature
     })
     .then(docRef => {
       console.log('Document written with ID: ', docRef)
