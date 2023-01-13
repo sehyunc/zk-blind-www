@@ -18,7 +18,6 @@ import {
 } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { abi } from '../constants/abi'
-import blind from '../constants/blindAbi'
 import { createPost, getPosts } from './firebase'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
@@ -30,7 +29,7 @@ const Create = () => {
   const formattedAddr = address ? address : '0x'
   const [enabled, setEnabled] = useState(false)
   const { data: domainStr } = useContractRead({
-    address: enabled ? '0x04dc2484cc09c2E1c7496111A18b30878b7d14B2' : '0x',
+    address: enabled ? '0x13e4E0a14729d9b7017E77ebbDEad05cb8ad1540' : '0x',
     abi,
     functionName: 'get',
     args: [formattedAddr]
@@ -55,15 +54,15 @@ const Create = () => {
   async function handleCreatePost() {
     // sign message
     if (!domainStr) return
-    // const sig = await signer?.signMessage(message)
+    const sig = await signer?.signMessage(message)
     // const post = await createPost(company, message, address as any, sig as any);
     const uniqueId = formattedAddr + Date.now().toString()
     const post = await createPost(
       uniqueId,
       domainStr,
       message,
-      address as any
-      // sig as any
+      address as string,
+      sig as string
     )
     // }
   }
