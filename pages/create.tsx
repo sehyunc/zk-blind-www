@@ -9,8 +9,11 @@ import {
 import { Silkscreen } from '@next/font/google'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useEffect, useState } from 'react'
-import { useAccount, useContractRead } from 'wagmi'
+import { useAccount, useContractRead, useConnect, useSigner, useContract } from 'wagmi'
+import { InjectedConnector } from "wagmi/connectors/injected";
 import { abi } from '../constants/abi'
+import blind from '../constants/blindAbi'
+import { createPost } from "./firebase"
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 
@@ -20,16 +23,45 @@ const Create = () => {
   const { address } = useAccount()
   const formattedAddr = address ? address : '0x'
   const [enabled, setEnabled] = useState(false)
-  const { data: domainStr } = useContractRead({
-    address: enabled ? '0x04dc2484cc09c2E1c7496111A18b30878b7d14B2' : '0x',
-    abi,
-    functionName: 'get',
-    args: [formattedAddr]
-  })
+  // const { data: domainStr } = useContractRead({
+  //   address: enabled ? '0x04dc2484cc09c2E1c7496111A18b30878b7d14B2' : '0x',
+  //   abi,
+  //   functionName: 'get',
+  //   args: [formattedAddr]
+  // })
 
   useEffect(() => {
     if (!enabled) setEnabled(true)
   }, [enabled])
+
+  const { connect } = useConnect({
+    connector: new InjectedConnector(),
+  });
+
+  const { data: signer } = useSigner();
+
+  const blindContract = useContract({
+    address: "0x13e4E0a14729d9b7017E77ebbDEad05cb8ad1540",
+    abi: blind["abi"],
+    signerOrProvider: signer,
+  });
+
+  async function create() {
+    console.log("hi")
+    // get the user's company 
+    const company = await blindContract?.get(address)
+
+    console.log("hi")
+    // if (company == 0) {
+    //   console.log("User not authenticated")
+    // } else {
+      // sign message 
+      const sig = await signer?.signMessage(message);
+      const post = await createPost(company, message, address as any, sig as any);
+      console.log(post)
+    // }
+    
+  }
 
   return (
     <Container
@@ -61,8 +93,8 @@ const Create = () => {
             value={message}
           />
         </div>
-        <div className={font.className}>Committed to {domainStr}</div>
-        <Button>Create Post</Button>
+        {/* <div className={font.className}>Committed to {domainStr}</div> */}
+        <Button onClick={create}>Create Post</Button>
       </Flex>
     </Container>
   )
