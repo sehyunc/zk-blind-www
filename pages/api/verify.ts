@@ -8,6 +8,8 @@ type Data = {
 }
 
 export async function verifyProof(proof: any, publicSignals: any) {
+  console.log(publicSignals)
+  console.log(proof)
   const proofVerified = await snarkjs.groth16.verify(vkey, publicSignals, proof)
   return proofVerified
 }
