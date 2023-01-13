@@ -58,16 +58,13 @@ const Create = () => {
     // const sig = await signer?.signMessage(message)
     // const post = await createPost(company, message, address as any, sig as any);
     const uniqueId = formattedAddr + Date.now().toString()
-    // const post = await createPost(
-    //   uniqueId,
-    //   domainStr,
-    //   message,
-    //   address as any
-    //   // sig as any
-    // )
-    const res = await getPosts()
-    console.log('🚀 ~ handleCreatePost ~ res', res)
-    // console.log('🚀 ~ create ~ post', post)
+    const post = await createPost(
+      uniqueId,
+      domainStr,
+      message,
+      address as any
+      // sig as any
+    )
     // }
   }
 
