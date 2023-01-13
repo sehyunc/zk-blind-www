@@ -197,6 +197,7 @@ export default function Home() {
                 <Button
                   className={font.className}
                   rightIcon={<ArrowForwardIcon />}
+                  onClick={() => router.push('/posts')}
                 >
                   ZKBlind
                 </Button>
