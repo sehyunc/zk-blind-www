@@ -141,7 +141,7 @@ export default function Home() {
           <Flex
             direction="column"
             alignItems="center"
-            backgroundColor="#1E1E38"
+            backgroundColor="#241520"
             padding="8"
             gap="4"
             borderRadius="10"
@@ -152,10 +152,10 @@ export default function Home() {
               onChange={e => setToken(e.target.value)}
               size="lg"
               placeholder="Paste your JWT here"
-              _placeholder={{ color: '#A1A1A1' }}
+              _placeholder={{ color: '#992870' }}
             />
             <Button
-              backgroundColor="#4C82FB"
+              backgroundColor="#992870"
               onClick={handleGenerate}
               variant="solid"
               isLoading={isGenerating}
@@ -168,16 +168,16 @@ export default function Home() {
               value={!!proof ? JSON.stringify(proof) : ''}
               size="lg"
               placeholder="Waiting for proof generation"
-              _placeholder={{ color: '#A1A1A1' }}
+              _placeholder={{ color: '#992870' }}
             />
             <Textarea
               value={publicInputs.toString()}
               size="lg"
               placeholder="Waiting for public input generation"
-              _placeholder={{ color: '#A1A1A1' }}
+              _placeholder={{ color: '#992870' }}
             />
             <Button
-              backgroundColor="#4C82FB"
+              backgroundColor="#992870"
               //   onClick={handleVerify}
               onClick={handleVerifyContract}
               variant="solid"
