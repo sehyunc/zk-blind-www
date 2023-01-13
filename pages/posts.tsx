@@ -1,75 +1,97 @@
-import {
-  Button,
-  Container,
-  Flex,
-  Input,
-  Text,
-  Textarea
-} from '@chakra-ui/react'
+//@ts-nocheck
+import { Button, Container, Flex, Text, useDisclosure } from '@chakra-ui/react'
 import { Silkscreen } from '@next/font/google'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useEffect, useState } from 'react'
-import {
-  useAccount,
-  useContractRead,
-  useConnect,
-  useSigner,
-  useContract
-} from 'wagmi'
-import { InjectedConnector } from 'wagmi/connectors/injected'
-import { abi } from '../constants/abi'
-import blind from '../constants/blindAbi'
+import Create from './create'
 import { getPosts } from './firebase'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 
 const Display = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure()
   const [posts, setPosts] = useState([])
+  console.log('🚀 ~ Display ~ posts', posts)
 
   useEffect(() => {
-    getPostArray()
+    const fetchPosts = async () => {
+      const res = await getPosts()
+      setPosts(res as any)
+    }
+    fetchPosts()
   }, [])
 
-  const { connect } = useConnect({
-    connector: new InjectedConnector()
-  })
-
-  const { data: signer } = useSigner()
-
-  async function getPostArray() {
-    const res = await getPosts()
-    console.log(res)
-    setPosts(res as any)
-  }
-
-  function getPostComponent(e: any) {
+  const Post = ({
+    title,
+    msg,
+    signature,
+    company
+  }: {
+    title: string
+    msg: string
+    signature: string
+    company: string
+  }) => {
     return (
-      <Flex
-        direction="column"
-        alignItems="center"
-        backgroundColor="#241520"
-        padding="8"
-        gap="4"
-        borderRadius="10"
-      >
-        <Text>e.title</Text>
-        <Text>e.msg</Text>
-        <Text>Signature</Text>
-        <Text>e.signature</Text>
-      </Flex>
+      <>
+        <Flex
+          direction="column"
+          alignItems="center"
+          backgroundColor="#241520"
+          padding="8"
+          gap="4"
+          borderRadius="10"
+          minW="600px"
+          maxW="600px"
+        >
+          <Text className={font.className} style={{ fontSize: '20px' }}>
+            {title}
+          </Text>
+          <Text>
+            Signature:{' '}
+            {`${signature?.substring(0, 5)}...${signature?.substring(
+              signature.length - 5
+            )}`}
+          </Text>
+          <Text>{msg}</Text>
+          {/* <Text>{signature}</Text> */}
+          <Text>
+            Posted by:{' '}
+            <span
+              className={font.className}
+              style={{ textTransform: 'capitalize' }}
+            >
+              {company}
+            </span>
+          </Text>
+        </Flex>
+      </>
     )
   }
 
   return (
-    <Container
-      as={Flex}
-      centerContent
-      gap="6"
-      justifyContent="center"
-      minH="100vh"
-    >
-      {posts.map(getPostComponent)}
-    </Container>
+    <>
+      <Create isOpen={isOpen} onClose={onClose} />
+      <Container
+        as={Flex}
+        centerContent
+        gap="6"
+        justifyContent="center"
+        minH="100vh"
+      >
+        <div style={{ position: 'absolute', right: 0, top: 0 }}>
+          <Button onClick={() => onOpen()}>New Post</Button>
+        </div>
+        {posts.map(p => (
+          <Post
+            key={p.id}
+            title={p.title}
+            msg={p.msg}
+            signature={p.signature}
+            company={p.company}
+          />
+        ))}
+      </Container>
+    </>
   )
 }
 

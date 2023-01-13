@@ -42,11 +42,13 @@ export async function createPost(
   company: string,
   msg: string,
   pubkey: string,
-  signature: string
+  signature: string,
+  title: string
 ) {
   db.collection('posts')
     .doc(id)
     .set({
+      title,
       company: company,
       msg: msg,
       pubkey: pubkey,
