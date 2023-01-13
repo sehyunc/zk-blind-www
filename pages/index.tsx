@@ -1,5 +1,6 @@
 import {
   Button,
+  Center,
   Container,
   Flex,
   Text,
@@ -15,8 +16,10 @@ import Confetti from 'react-confetti'
 import { useWindowSize } from 'usehooks-ts'
 import { useAccount, useContractRead, useWaitForTransaction } from 'wagmi'
 import { abi } from '../constants/abi'
+import { Silkscreen } from '@next/font/google'
+import { ArrowForwardIcon } from '@chakra-ui/icons'
 
-const inter = Inter({ subsets: ['latin'] })
+const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 
 export default function Home() {
   const { address } = useAccount()
@@ -183,12 +186,22 @@ export default function Home() {
             >
               Verify
             </Button>
-            <p>{isGenerated && isVerified && 'Proof and Inputs Valid!'}</p>
-            <p>
-              {isGenerated &&
-                isVerified &&
-                `Proved you belong domain: ${domainStr}`}
-            </p>
+            {isGenerated && isVerified && (
+              <>
+                <p>{isGenerated && isVerified && 'Proof and Inputs Valid!'}</p>
+                <p>
+                  {isGenerated &&
+                    isVerified &&
+                    `Proved you belong domain: ${domainStr}`}
+                </p>
+                <Button
+                  className={font.className}
+                  rightIcon={<ArrowForwardIcon />}
+                >
+                  ZKBlind
+                </Button>
+              </>
+            )}
           </Flex>
         </Container>
       </main>
