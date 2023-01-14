@@ -9,9 +9,8 @@ const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 export const Sidebar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [domains, setDomains] = useState([])
-  console.log(domains)
 
-  const router = useRouter();
+  const router = useRouter()
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -25,7 +24,10 @@ export const Sidebar = () => {
 
       console.log(allDomains)
 
-      const uniqueDomains = allDomains.filter((e: string, i: any) => allDomains.findIndex((obj:any) => obj === e) === i)
+      const uniqueDomains = allDomains.filter(
+        (e: string, i: any) =>
+          allDomains.findIndex((obj: any) => obj === e) === i
+      )
 
       console.log(uniqueDomains)
       setDomains(uniqueDomains as [])
@@ -56,13 +58,22 @@ export const Sidebar = () => {
         </Button>
         Domains
         {domains.map((e, i) => {
-          return (<Button key={i} onClick={() => router.push({
-            pathname: '/posts',
-            query: { domain: e },
-          })} variant="link">{e}</Button>)
+          return (
+            <Button
+              key={i}
+              onClick={() =>
+                router.push({
+                  pathname: '/posts',
+                  query: { domain: e }
+                })
+              }
+              variant="link"
+            >
+              {e}
+            </Button>
+          )
         })}
       </Container>
-
     </Flex>
   )
 }
