@@ -60,7 +60,7 @@ export const Sidebar = () => {
               key={i}
               onClick={() =>
                 router.push({
-                  pathname: '/posts',
+                  pathname: '/',
                   query: { domain: e }
                 })
               }
