@@ -80,15 +80,14 @@ const Create = ({ isOpen, onClose }: { isOpen: boolean; onClose: any }) => {
   }
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay backdropBlur='5px'/>
-      <ModalContent backgroundColor='#1E1E38'>
+      <ModalOverlay backdropBlur='10px'/>
+      <ModalContent backgroundColor='#1E1E38' maxW ='600px'>
         <ModalHeader className={font.className}>Create Post</ModalHeader>
         <ModalCloseButton />
         <ModalBody >
           <Flex
             direction="column"
-            padding="4"
-            gap="4"
+            gap="2"
             borderRadius="10"
           >
             {/* <> // taking out title for now

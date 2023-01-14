@@ -50,7 +50,7 @@ const Display = () => {
     )
   }
 
-  const Post = ({
+  const PostPreview = ({
     title,
     msg,
     signature,
@@ -74,6 +74,12 @@ const Display = () => {
           borderRadius="10"
           minW="800px"
           maxW="800px"
+          maxH='190px'
+          _hover={{
+            cursor: 'pointer',
+            backgroundColor: '#262645',
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+          }}
         >
           <Flex direction='row' 
           justifyContent='space-between'
@@ -90,12 +96,11 @@ const Display = () => {
             </Text>
             </>
           </Flex>
-          {/* <Text className={font.className} style={{ fontSize: '20px' }}>
-          </Text> */}
 
-          <Text className={bodyFont.className} color='#F5F5F4' fontSize='15'>{msg}</Text>
-          {/* <Text>{signature}</Text> */}
-          
+          <Text alignContent='start' display='block' className={bodyFont.className} color='#F5F5F4' fontSize='15'
+          overflow='hidden'>
+            {msg}
+          </Text>
         </Flex>
       </>
     )
@@ -115,7 +120,7 @@ const Display = () => {
         maxW="800px"
       >
         {posts.map(p => (
-          <Post
+          <PostPreview
             key={p.id}
             title={p.title}
             msg={p.msg}
