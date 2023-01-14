@@ -1,42 +1,33 @@
-import { Box, Button, Container, Flex, useDisclosure } from '@chakra-ui/react'
+import { Button, Container, Flex, useDisclosure } from '@chakra-ui/react'
 import { Silkscreen } from '@next/font/google'
-import { useState, useEffect } from 'react'
-import { getPosts } from '../pages/firebase'
-import Create from '../pages/create'
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import Create from '../pages/create'
+import { getPosts } from '../pages/firebase'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 export const Sidebar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [domains, setDomains] = useState([])
-
   const router = useRouter()
+  const [domains, setDomains] = useState([])
 
   useEffect(() => {
     const fetchPosts = async () => {
       const res = await getPosts()
-
-      console.log(res)
-
       const allDomains = res.map((post: any) => {
         return post.company
       })
-
-      console.log(allDomains)
-
       const uniqueDomains = allDomains.filter(
         (e: string, i: any) =>
           allDomains.findIndex((obj: any) => obj === e) === i
       )
-
-      console.log(uniqueDomains)
       setDomains(uniqueDomains as [])
     }
     fetchPosts()
   }, [])
 
   return (
-    <Flex padding="4">
+    <Flex p="4">
       <Create isOpen={isOpen} onClose={onClose} />
       <Container
         as={Flex}
@@ -50,7 +41,11 @@ export const Sidebar = () => {
         color="white"
         className={font.className}
       >
-        <Button backgroundColor="#4C82FB" w="100%" onClick={() => router.push('/posts')}>
+        <Button
+          backgroundColor="#4C82FB"
+          w="100%"
+          onClick={() => router.push('/')}
+        >
           Home
         </Button>
         <Button backgroundColor="#4C82FB" w="100%" onClick={() => onOpen()}>

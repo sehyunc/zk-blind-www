@@ -1,19 +1,13 @@
 //@ts-nocheck
 import { Container, Flex } from '@chakra-ui/react'
-import { Karla, Silkscreen } from '@next/font/google'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Post from '../components/Post'
 import { getPosts, getPostsFilterDomain } from './firebase'
 
-const font = Silkscreen({ subsets: ['latin'], weight: '400' })
-const bodyFont = Karla({ weight: '300' })
-
-const Display = () => {
-  const [posts, setPosts] = useState([])
-  console.log('🚀 ~ Display ~ posts', posts)
-
+const Home = () => {
   const router = useRouter()
+  const [posts, setPosts] = useState([])
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -56,4 +50,4 @@ const Display = () => {
   )
 }
 
-export default Display
+export default Home

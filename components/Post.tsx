@@ -5,7 +5,7 @@ import { useContract, useSigner } from 'wagmi'
 import { abi } from '../constants/abi'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
-const bodyFont = Karla({ weight: '300' })
+const bodyFont = Karla({ subsets: ['latin'], weight: '400' })
 
 const Post = ({
   msg,
@@ -17,15 +17,17 @@ const Post = ({
   signature: string
   company: string
 }) => {
-  const toast = useToast()
   const { data: signer } = useSigner()
-  const sig = ethers.utils.splitSignature(signature as any)
-  const signingAddr = ethers.utils.verifyMessage(msg, sig)
   const blind = useContract({
     address: '0x13e4E0a14729d9b7017E77ebbDEad05cb8ad1540',
     abi,
     signerOrProvider: signer
   })
+  const toast = useToast()
+  const cutMsg = msg.substring(0, 1000) + (msg.length > 1000 ? '...' : '')
+
+  const sig = ethers.utils.splitSignature(signature as any)
+  const signingAddr = ethers.utils.verifyMessage(msg, sig)
   async function verifySig() {
     if (!blind || !signingAddr) return
     const domain = await blind.get(signingAddr as `0x${string}`)
@@ -54,16 +56,16 @@ const Post = ({
     <>
       <Flex
         direction="column"
-        alignItems="center"
         backgroundColor="#1E1E38"
-        padding="12"
-        paddingTop="8"
-        paddingBottom="8"
+        alignItems="center"
+        padding="8"
+        // paddingTop="8"
+        // paddingBottom="8"
         gap="4"
         borderRadius="10"
         minW="800px"
-        maxW="800px"
-        maxH="190px"
+        // maxW="800px"
+        // maxH="190px"
         _hover={{
           cursor: 'pointer',
           backgroundColor: '#262645',
@@ -71,7 +73,7 @@ const Post = ({
             '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
         }}
       >
-        <Flex direction="row" justifyContent="space-between" w="100%">
+        <Flex justifyContent="space-between" w="100%">
           <Box
             backgroundColor="#4C82FB"
             className={font.className}
@@ -81,12 +83,12 @@ const Post = ({
           >
             {company}
           </Box>
-          <Text className={bodyFont.className}>
+          {/* <Text className={bodyFont.className}>
             Signature:{' '}
             {`${signature?.substring(0, 5)}...${signature?.substring(
               signature.length - 5
             )}`}
-          </Text>
+          </Text> */}
           <Button onClick={verifySig} variant="link">
             Verify
           </Button>
@@ -96,10 +98,10 @@ const Post = ({
           display="block"
           className={bodyFont.className}
           color="#F5F5F4"
-          fontSize="15"
+          fontSize="16"
           overflow="hidden"
         >
-          {msg}
+          {cutMsg}
         </Text>
       </Flex>
     </>
