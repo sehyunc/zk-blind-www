@@ -1,212 +1,136 @@
-import {
-  Button,
-  Center,
-  Container,
-  Flex,
-  Text,
-  Textarea,
-  useToast
-} from '@chakra-ui/react'
-import { Inter } from '@next/font/google'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
-import Head from 'next/head'
-import { useRouter } from 'next/router'
-import { useCallback, useEffect, useState } from 'react'
-import Confetti from 'react-confetti'
-import { useWindowSize } from 'usehooks-ts'
-import { useAccount, useContractRead, useWaitForTransaction } from 'wagmi'
-import { abi } from '../constants/abi'
+//@ts-nocheck
+import { Button, Container, Flex, Text, useDisclosure } from '@chakra-ui/react'
 import { Silkscreen } from '@next/font/google'
-import { ArrowForwardIcon } from '@chakra-ui/icons'
-import { Footer } from './components/footer'
+import { useEffect, useState } from 'react'
+import { getPosts, getPostsFilterDomain } from './firebase'
+import { Karla } from '@next/font/google'
+import { useRouter } from "next/router"
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
+const bodyFont = Karla({weight: '300'})
 
-export default function Home() {
-  const { address } = useAccount()
-  const router = useRouter()
-  const [domain, setDomain] = useState('')
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [isGenerated, setIsGenerated] = useState(false)
-  const [isVerified, setIsVerified] = useState(false)
-  const [proof, setProof] = useState('')
-  const [publicInputs, setPublicSignals] = useState<string[]>([])
-  const [token, setToken] = useState('')
-  const { height, width } = useWindowSize()
-  const [hash, setHash] = useState<`0x${string}`>()
-  const toast = useToast()
-  const { isSuccess: txSuccess } = useWaitForTransaction({
-    // confirmations: 5,
-    hash,
-    enabled: !!hash
-  })
+const Display = () => {
 
-  const formattedAddr = address ? address : '0x'
+  const [posts, setPosts] = useState([])
+  console.log('🚀 ~ Display ~ posts', posts)
 
-  const { data: domainStr } = useContractRead({
-    address: '0x04dc2484cc09c2E1c7496111A18b30878b7d14B2',
-    abi,
-    functionName: 'get',
-    args: [formattedAddr],
-    enabled: txSuccess,
-    onSuccess: data => {
-      if (data) {
-        setDomain(`${data}`)
+  const router = useRouter();
+
+  useEffect(() => {
+
+    const fetchPosts = async () => {
+      console.log(router.query.domain)
+      if (router.query.domain != undefined) {
+        const res = await getPostsFilterDomain(router.query.domain)
+        setPosts(res as any)
+      } else {
+        const res = await getPosts()
+        setPosts(res as any)
       }
     }
-  })
+    fetchPosts()
+  }, [router.query.domain])
 
-  const msg = router.query.msg
 
-  useEffect(() => {
-    if (txSuccess) {
-    }
-  }, [txSuccess])
+  const Domain =({domain}: {domain:string}) => {
+    return (
+      <Container 
+      backgroundColor='#4C82FB'
+      w='fit-content'
+      borderRadius='4'
+      alignItems='start'
+      >
+          <span
+      className={font.className}
+      style={{ textTransform: 'capitalize' }}
+    >
+    {domain}
+    </span>
+      </Container>
+    )
+  }
 
-  useEffect(() => {
-    if (!token && msg) {
-      setToken(msg.toString())
-    }
-  }, [msg, token])
+  const PostPreview = ({
+    title,
+    msg,
+    signature,
+    company
+  }: {
+    title: string
+    msg: string
+    signature: string
+    company: string
+  }) => {
+    return (
+      <>
+        <Flex
+          direction="column"
+          alignItems="center"
+          backgroundColor="#1E1E38"
+          padding="12"
+          paddingTop="8"
+          paddingBottom='8'
+          gap="4"
+          borderRadius="10"
+          minW="800px"
+          maxW="800px"
+          maxH='190px'
+          _hover={{
+            cursor: 'pointer',
+            backgroundColor: '#262645',
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+          }}
+        >
+          <Flex direction='row' 
+          justifyContent='space-between'
+          w='100%'>
+            <div display='flex'>
+              <Domain domain={company}></Domain>
+            </div>
+            <>
+            <Text className={bodyFont.className}>
+              Signature:{' '}
+              {`${signature?.substring(0, 5)}...${signature?.substring(
+                signature.length - 5
+              )}`}
+            </Text>
+            </>
+          </Flex>
 
-  const handleVerify = useCallback(async () => {
-    setIsVerifying(true)
-    const res = await fetch('http://localhost:3000/api/verify', {
-      method: 'POST',
-      body: JSON.stringify({
-        proof,
-        publicInputs
-      })
-    }).then(res => {
-      setIsVerifying(false)
-      return res.json()
-    })
-    if (res.isVerified) {
-      setIsVerified(true)
-    }
-  }, [proof, publicInputs])
-
-  const handleVerifyContract = useCallback(async () => {
-    setIsVerifying(true)
-    const res = await fetch('http://localhost:3000/api/contract', {
-      method: 'POST',
-      body: JSON.stringify({ proof, publicInputs })
-    }).then(res => {
-      setIsVerifying(false)
-      return res.json()
-    })
-    if (res.hash) {
-      setIsVerified(true)
-      setHash(res.hash)
-    }
-  }, [proof, publicInputs])
-
-  const handleGenerate = useCallback(async () => {
-    setIsGenerating(true)
-    const proveOutput = await fetch('http://localhost:3000/api/prove', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        address
-      })
-    }).then(res => {
-      setIsGenerating(false)
-      return res.json()
-    })
-    if (proveOutput.proof && proveOutput.publicSignals) {
-      setProof(proveOutput.proof)
-      setPublicSignals(proveOutput.publicSignals)
-      setIsGenerated(true)
-    }
-  }, [address, token])
+          <Text alignContent='start' display='block' className={bodyFont.className} color='#F5F5F4' fontSize='15'
+          overflow='hidden'>
+            {msg}
+          </Text>
+        </Flex>
+      </>
+    )
+  }
 
   return (
     <>
-      <Head>
-        <title>zk blind</title>
-        <meta name="description" content="Generated by create next app" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main>
-        {isVerified && <Confetti width={width} height={height} />}
-        <Container
-          as={Flex}
-          centerContent
-          gap="6"
-          justifyContent="center"
-          minH="100vh"
-        >
-          <Flex
-            direction="column"
-            alignItems="center"
-            backgroundColor="#241520"
-            padding="8"
-            gap="4"
-            borderRadius="10"
-          >
-            <ConnectButton />
-            <Textarea
-              value={token}
-              onChange={e => setToken(e.target.value)}
-              size="lg"
-              placeholder="Paste your JWT here"
-              _placeholder={{ color: '#992870' }}
-            />
-            <Button
-              backgroundColor="#992870"
-              onClick={handleGenerate}
-              variant="solid"
-              isLoading={isGenerating}
-              loadingText="Generating"
-              isDisabled={isGenerated}
-            >
-              {isGenerated ? 'Generated' : 'Generate Proof and Inputs'}
-            </Button>
-            <Textarea
-              value={!!proof ? JSON.stringify(proof) : ''}
-              size="lg"
-              placeholder="Waiting for proof generation"
-              _placeholder={{ color: '#992870' }}
-            />
-            <Textarea
-              value={publicInputs.toString()}
-              size="lg"
-              placeholder="Waiting for public input generation"
-              _placeholder={{ color: '#992870' }}
-            />
-            <Button
-              backgroundColor="#992870"
-              //   onClick={handleVerify}
-              onClick={handleVerifyContract}
-              variant="solid"
-              isLoading={isVerifying}
-              loadingText="Verifying"
-              //   isDisabled={!isGenerated || isVerified}
-            >
-              Verify
-            </Button>
-            {isGenerated && isVerified && (
-              <>
-                <p>{isGenerated && isVerified && 'Proof and Inputs Valid!'}</p>
-                <p>
-                  {isGenerated &&
-                    isVerified &&
-                    `Proved you belong domain: ${domainStr}`}
-                </p>
-                <Button
-                  className={font.className}
-                  rightIcon={<ArrowForwardIcon />}
-                  onClick={() => router.push('/posts')}
-                >
-                  ZKBlind
-                </Button>
-              </>
-            )}
-          </Flex>
-        </Container>
-      </main>
+      <Container
+        as={Flex}
+        centerContent
+        gap="4"
+        padding='4'
+        justifyContent="center"
+        minH="100vh"
+        margin='0'
+        minW="800px"
+        maxW="800px"
+      >
+        {posts.map(p => (
+          <PostPreview
+            key={p.id}
+            title={p.title}
+            msg={p.msg}
+            signature={p.signature}
+            company={p.company}
+          />
+        ))}
+      </Container>
     </>
   )
 }
+
+export default Display
