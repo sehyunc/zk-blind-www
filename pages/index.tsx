@@ -40,6 +40,7 @@ const Home = () => {
       >
         {posts.map(p => (
           <Post
+            key={p.id}
             k={p.id}
             msg={p.msg}
             signature={p.signature}
