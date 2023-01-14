@@ -18,7 +18,7 @@ import { useAccount, useContractRead, useWaitForTransaction } from 'wagmi'
 import { abi } from '../constants/abi'
 import { Silkscreen } from '@next/font/google'
 import { ArrowForwardIcon } from '@chakra-ui/icons'
-import { Footer } from './components/footer'
+import { Footer } from '../components/footer'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 

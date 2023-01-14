@@ -10,8 +10,8 @@ import { useRouter } from 'next/router'
 import { configureChains, createClient, goerli, WagmiConfig } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import '../styles/globals.css'
-import { Footer } from './components/footer'
-import { Sidebar } from './components/sidebar'
+import { Footer } from '../components/footer'
+import { Sidebar } from '../components/sidebar'
 
 const { chains, provider } = configureChains([goerli], [publicProvider()])
 

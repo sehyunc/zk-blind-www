@@ -1,8 +1,8 @@
 import { Box, Button, Container, Flex, useDisclosure } from '@chakra-ui/react'
 import { Silkscreen } from '@next/font/google'
 import { useState, useEffect } from 'react'
-import { getPosts } from '../firebase'
-import Create from '../create'
+import { getPosts } from '../pages/firebase'
+import Create from '../pages/create'
 import { useRouter } from 'next/router'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
