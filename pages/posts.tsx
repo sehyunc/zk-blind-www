@@ -1,18 +1,30 @@
 //@ts-nocheck
-import { Button, Container, Flex, Text, useDisclosure } from '@chakra-ui/react'
+import { Button, Container, Flex, Text, useDisclosure, Box, useToast } from '@chakra-ui/react'
 import { Silkscreen } from '@next/font/google'
 import { useEffect, useState } from 'react'
 import { getPosts, getPostsFilterDomain } from './firebase'
 import { Karla } from '@next/font/google'
 import { useRouter } from "next/router"
+import {ethers} from 'ethers'
+import { useContract, useSigner } from 'wagmi'
+import { abi } from '../constants/abi'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 const bodyFont = Karla({weight: '300'})
-
 const Display = () => {
+
+  const toast = useToast()
 
   const [posts, setPosts] = useState([])
   console.log('🚀 ~ Display ~ posts', posts)
+
+  const { data: signer } = useSigner()
+
+  const blind = useContract({
+    address: '0x13e4E0a14729d9b7017E77ebbDEad05cb8ad1540',
+    abi,
+    signerOrProvider: signer
+  })
 
   const router = useRouter();
 
@@ -61,6 +73,34 @@ const Display = () => {
     signature: string
     company: string
   }) => {
+
+    async function verifySig() {
+
+        const sig = ethers.utils.splitSignature(signature as any);
+        console.log(sig)
+        const signingAddr = ethers.utils.verifyMessage(msg, sig)
+        const domain = await blind.get(signingAddr)
+        if (domain) {
+            console.log("verified")
+            toast({
+                title: 'Message verified.',
+                description: "We've verified the sender's signature for you",
+                status: 'success',
+                duration: 9000,
+                isClosable: true,
+              })
+        } else {
+            console.log("not verified")
+            toast({
+                title: 'Message not verified.',
+                description: "This signer is not a valid poster.",
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+              })
+        }
+        // verify that the signingaddr is the same as the addr we want 
+    }
     return (
       <>
         <Flex
@@ -88,12 +128,17 @@ const Display = () => {
               <Domain domain={company}></Domain>
             </div>
             <>
+            <Box>
             <Text className={bodyFont.className}>
               Signature:{' '}
               {`${signature?.substring(0, 5)}...${signature?.substring(
                 signature.length - 5
               )}`}
             </Text>
+            <Button variant="link" onClick={verifySig}>
+                Verify
+            </Button>
+            </Box>
             </>
           </Flex>
 

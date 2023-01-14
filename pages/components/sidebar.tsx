@@ -48,6 +48,9 @@ export const Sidebar = () => {
         color="white"
         className={font.className}
       >
+        <Button backgroundColor="#4C82FB" w="100%" onClick={() => router.push('/posts')}>
+          Home
+        </Button>
         <Button backgroundColor="#4C82FB" w="100%" onClick={() => onOpen()}>
           New Post
         </Button>

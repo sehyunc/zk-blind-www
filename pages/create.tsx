@@ -30,6 +30,8 @@ import {
   ModalCloseButton
 } from '@chakra-ui/react'
 
+import {ethers} from 'ethers'
+
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 
 
@@ -65,7 +67,8 @@ const Create = ({ isOpen, onClose }: { isOpen: boolean; onClose: any }) => {
   async function handleCreatePost() {
     // sign message
     if (!domainStr) return
-    const sig = await signer?.signMessage(message)
+    const signedMessage = await signer?.signMessage(message)
+
     // const post = await createPost(company, message, address as any, sig as any);
     const uniqueId = formattedAddr + Date.now().toString()
     const post = await createPost(
@@ -73,7 +76,7 @@ const Create = ({ isOpen, onClose }: { isOpen: boolean; onClose: any }) => {
       domainStr,
       message,
       address as string,
-      sig as string,
+      signedMessage as string,
       title as string
     )
     // }
