@@ -3,16 +3,18 @@ import { Karla, Silkscreen } from '@next/font/google'
 import { ethers } from 'ethers'
 import { useContract, useSigner } from 'wagmi'
 import { abi } from '../constants/abi'
+import { useRouter } from 'next/router'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 const bodyFont = Karla({ subsets: ['latin'], weight: '400' })
 
 const Post = ({
+  key,
   msg,
   signature,
-  company
+  company, 
 }: {
-  title: string
+  key: string
   msg: string
   signature: string
   company: string
@@ -25,6 +27,11 @@ const Post = ({
   })
   const toast = useToast()
   const cutMsg = msg.substring(0, 1000) + (msg.length > 1000 ? '...' : '')
+  
+  console.log(key)
+  console.log(msg)
+
+  const router = useRouter()
 
   const sig = ethers.utils.splitSignature(signature as any)
   const signingAddr = ethers.utils.verifyMessage(msg, sig)
@@ -72,6 +79,8 @@ const Post = ({
           boxShadow:
             '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
         }}
+
+        onClick={() => router.push("/post/" + key)}
       >
         <Flex justifyContent="space-between" w="100%">
           <Box

@@ -14,9 +14,11 @@ const Home = () => {
       console.log(router.query.domain)
       if (router.query.domain != undefined) {
         const res = await getPostsFilterDomain(router.query.domain)
+        console.log(res)
         setPosts(res as any)
       } else {
         const res = await getPosts()
+        console.log(res)
         setPosts(res as any)
       }
     }
@@ -39,7 +41,6 @@ const Home = () => {
         {posts.map(p => (
           <Post
             key={p.id}
-            title={p.title}
             msg={p.msg}
             signature={p.signature}
             company={p.company}

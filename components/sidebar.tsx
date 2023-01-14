@@ -33,6 +33,7 @@ export const Sidebar = () => {
         as={Flex}
         centerContent
         maxH="400"
+        height="300"
         bg="#1E1E38"
         borderRadius="10"
         w="200px"
@@ -40,6 +41,9 @@ export const Sidebar = () => {
         gap="4"
         color="white"
         className={font.className}
+        position="fixed"
+        // left= "50%"
+        marginLeft= "-200px" /*half the width*/
       >
         <Button
           backgroundColor="#4C82FB"
