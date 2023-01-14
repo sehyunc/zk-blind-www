@@ -9,12 +9,12 @@ const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 const bodyFont = Karla({ subsets: ['latin'], weight: '400' })
 
 const Post = ({
-  key,
+  k,
   msg,
   signature,
   company, 
 }: {
-  key: string
+  k: any
   msg: string
   signature: string
   company: string
@@ -27,7 +27,7 @@ const Post = ({
   })
   const toast = useToast()
   
-  console.log(key)
+  console.log(k)
   console.log(msg)
 
   const router = useRouter()
@@ -80,7 +80,7 @@ const Post = ({
             '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
         }}
 
-        onClick={() => router.push("/post/" + key)}
+        onClick={() => router.push("/post/" + k)}
       >
         <Flex justifyContent="space-between" w="100%">
           <Box
