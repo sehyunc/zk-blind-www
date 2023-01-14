@@ -36,7 +36,7 @@ const theme = extendTheme({
 })
 
 export default function App({ Component, pageProps }: AppProps) {
-  const isLoggedIn = false
+  const isLoggedIn = true
   return (
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains} theme={darkTheme()}>
@@ -47,7 +47,7 @@ export default function App({ Component, pageProps }: AppProps) {
             margin='0 auto'
             gap='4'
             >
-            {isLoggedIn && <Sidebar />}
+              {isLoggedIn && <Sidebar />}
             <Component {...pageProps} />
           </Flex>
         </ChakraProvider>
