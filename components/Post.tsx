@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text, useToast } from '@chakra-ui/react'
+import { Box, Button, Flex, Text, Tooltip, useToast } from '@chakra-ui/react'
 import { Karla, Silkscreen } from '@next/font/google'
 import { ethers } from 'ethers'
 import { useContract, useSigner } from 'wagmi'
@@ -89,12 +89,18 @@ const Post = ({
               signature.length - 5
             )}`}
           </Text> */}
-          <Button onClick={verifySig} className={font.className} variant="link">
-            Verify
-          </Button>
+            <Tooltip placement='top' 
+            openDelay={500}
+            maxW={230}
+            textAlign='center'
+            label='Verify message was signed by authenticated user'>
+              <Button onClick={verifySig} className={font.className} variant="link">
+              Verify
+            </Button>
+            </Tooltip>
+
         </Flex>
         <Text
-          alignContent="start"
           display="block"
           className={bodyFont.className}
           color="#F5F5F4"
