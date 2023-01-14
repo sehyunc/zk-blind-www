@@ -45,16 +45,18 @@ export const Sidebar = () => {
           backgroundColor="#4C82FB"
           w="100%"
           onClick={() => router.push('/')}
+          size='md'
         >
           Home
         </Button>
-        <Button backgroundColor="#4C82FB" w="100%" onClick={() => onOpen()}>
+        <Button size='md' backgroundColor="#4C82FB" w="100%" onClick={() => onOpen()}>
           New Post
         </Button>
         Domains
         {domains.map((e, i) => {
           return (
             <Button
+              size='sm'
               key={i}
               onClick={() =>
                 router.push({

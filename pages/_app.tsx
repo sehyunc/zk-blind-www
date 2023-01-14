@@ -47,6 +47,7 @@ export default function App({ Component, pageProps }: AppProps) {
             flexDirection="row"
             margin="0 auto"
             gap="4"
+            padding="8"
           >
             {pathname !== '/login' && <Sidebar />}
             <Component {...pageProps} />

@@ -89,7 +89,7 @@ const Post = ({
               signature.length - 5
             )}`}
           </Text> */}
-          <Button onClick={verifySig} variant="link">
+          <Button onClick={verifySig} className={font.className} variant="link">
             Verify
           </Button>
         </Flex>
