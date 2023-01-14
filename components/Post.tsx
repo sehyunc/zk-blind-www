@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text, useToast } from '@chakra-ui/react'
+import { Box, Button, Flex, Text, Tooltip, useToast } from '@chakra-ui/react'
 import { Karla, Silkscreen } from '@next/font/google'
 import { ethers } from 'ethers'
 import { useContract, useSigner } from 'wagmi'
@@ -21,17 +21,17 @@ const Post = ({
 }) => {
   const { data: signer } = useSigner()
   const blind = useContract({
-    address: '0x13e4E0a14729d9b7017E77ebbDEad05cb8ad1540',
+    address: '0xAD6aab5161C5DC3f20210b2e4B4d01196737F1EF',
     abi,
     signerOrProvider: signer
   })
   const toast = useToast()
-  const cutMsg = msg.substring(0, 1000) + (msg.length > 1000 ? '...' : '')
   
   console.log(key)
   console.log(msg)
 
   const router = useRouter()
+  const cutMsg = msg.substring(0, 575) + (msg.length > 575 ? '...' : '')
 
   const sig = ethers.utils.splitSignature(signature as any)
   const signingAddr = ethers.utils.verifyMessage(msg, sig)
@@ -98,12 +98,18 @@ const Post = ({
               signature.length - 5
             )}`}
           </Text> */}
-          <Button onClick={verifySig} className={font.className} variant="link">
-            Verify
-          </Button>
+            <Tooltip placement='top' 
+            openDelay={500}
+            maxW={230}
+            textAlign='center'
+            label='Verify message was signed by authenticated user'>
+              <Button onClick={verifySig} className={font.className} variant="link">
+              Verify
+            </Button>
+            </Tooltip>
+
         </Flex>
         <Text
-          alignContent="start"
           display="block"
           className={bodyFont.className}
           color="#F5F5F4"

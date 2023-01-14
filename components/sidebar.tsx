@@ -1,11 +1,12 @@
 import { Button, Container, Flex, useDisclosure } from '@chakra-ui/react'
-import { Silkscreen } from '@next/font/google'
+import { Karla, Silkscreen } from '@next/font/google'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Create from '../pages/create'
 import { getPosts } from '../pages/firebase'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
+const bodyFont = Karla({ subsets: ['latin'], weight: '400' })
 export const Sidebar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const router = useRouter()

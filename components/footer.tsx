@@ -4,7 +4,6 @@ import { Silkscreen } from '@next/font/google'
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 export const Footer = () => {
 
-
     return (
         <Box 
         position='fixed'
