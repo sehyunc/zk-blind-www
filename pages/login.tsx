@@ -1,14 +1,8 @@
-import {
-  Button,
-  Center,
-  Container,
-  Flex,
-  Text,
-  Textarea,
-  useToast
-} from '@chakra-ui/react'
-import { Inter } from '@next/font/google'
+import { ArrowForwardIcon } from '@chakra-ui/icons'
+import { Button, Container, Flex, Textarea, useToast } from '@chakra-ui/react'
+import { Silkscreen } from '@next/font/google'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
+import localforage from 'localforage'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
@@ -16,9 +10,6 @@ import Confetti from 'react-confetti'
 import { useWindowSize } from 'usehooks-ts'
 import { useAccount, useContractRead, useWaitForTransaction } from 'wagmi'
 import { abi } from '../constants/abi'
-import { Silkscreen } from '@next/font/google'
-import { ArrowForwardIcon } from '@chakra-ui/icons'
-import { Footer } from '../components/footer'
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 
@@ -114,11 +105,12 @@ export default function Home() {
       setIsGenerating(false)
       return res.json()
     })
-    if (proveOutput.proof && proveOutput.publicSignals) {
-      setProof(proveOutput.proof)
-      setPublicSignals(proveOutput.publicSignals)
-      setIsGenerated(true)
-    }
+    console.log('🚀 ~ handleGenerate ~ proveOutput', proveOutput)
+    // if (proveOutput.proof && proveOutput.publicSignals) {
+    //   setProof(proveOutput.proof)
+    //   setPublicSignals(proveOutput.publicSignals)
+    //   setIsGenerated(true)
+    // }
   }, [address, token])
 
   return (
@@ -209,4 +201,47 @@ export default function Home() {
       </main>
     </>
   )
+}
+
+export const generateProof = async (inputs: any) => {
+  const zkeyDb = await localforage.getItem('jwt_single-real.zkey')
+
+  if (!zkeyDb) {
+    throw new Error('zkey was not found in the database')
+  }
+
+  //@ts-ignore
+  const zkeyRawData = new Uint8Array(zkeyDb)
+  console.log('🚀 ~ zkeyRawData', zkeyRawData)
+  // const zkeyRawData = new Uint8Array(zkey);
+
+  const zkeyFastFile = { type: 'mem', data: zkeyRawData }
+  const worker = new Worker('./worker.js')
+  // worker.postMessage([proofInputs, zkeyFastFile]);
+  worker.postMessage([inputs, zkeyFastFile])
+  worker.onmessage = async function (e) {
+    const { proof, publicSignals } = e.data
+    console.log('PROOF SUCCESSFULLY GENERATED: ', proof)
+  }
+}
+
+export async function downloadFromFilename() {
+  const link = 'https://zkjwt-zkey-chunks.s3.amazonaws.com/jwt_single-real.zkey'
+  try {
+    const zkeyResp = await fetch(link, {
+      method: 'GET'
+    })
+    const zkeyBuff = await zkeyResp.arrayBuffer()
+    if (zkeyBuff.byteLength == 0) {
+      console.log('Not saving file')
+    } else {
+      console.log('20: Got file', 'jwt_single-real.zkey')
+    }
+    await localforage.setItem('jwt_single-real.zkey', zkeyBuff)
+    console.log(`Storage of jwt_single-real.zkey successful!`)
+  } catch (e) {
+    console.log(
+      `Storage of jwt_single-real.zkey unsuccessful, make sure IndexedDB is enabled in your browser.`
+    )
+  }
 }

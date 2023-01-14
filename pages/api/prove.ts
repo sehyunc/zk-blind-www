@@ -20,8 +20,7 @@ const client = createClient({
 })
 
 type Data = {
-  proof: any
-  publicSignals: any
+  data: any
 }
 
 export default async function handler(
@@ -54,20 +53,19 @@ export default async function handler(
     bodyInit.msg,
     b.address
   )
-  console.log('🚀 ~ data', data)
-  await downloadProofFiles('jwt');
+  // console.log('🚀 ~ data', data)
+  // await downloadProofFiles('jwt');
 
-  const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-    data,
-    '/Users/kayleegeorge/code/zk/zk-blind/build/jwt/jwt_js/jwt.wasm',
-    '/Users/kayleegeorge/code/zk/zk-blind/build/jwt/jwt_single.zkey'
-  )
-  console.log('proof', proof)
-  console.log('publicSignals', publicSignals)
+  // const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+  //   data,
+  //   '/Users/kayleegeorge/code/zk/zk-blind/build/jwt/jwt_js/jwt.wasm',
+  //   '/Users/kayleegeorge/code/zk/zk-blind/build/jwt/jwt_single.zkey'
+  // )
+  // console.log('proof', proof)
+  // console.log('publicSignals', publicSignals)
 
   res.status(200).json({
-    proof,
-    publicSignals
+    data
   })
 }
 
