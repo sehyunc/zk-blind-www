@@ -19,12 +19,12 @@ const Post = ({
 }) => {
   const { data: signer } = useSigner()
   const blind = useContract({
-    address: '0x13e4E0a14729d9b7017E77ebbDEad05cb8ad1540',
+    address: '0xAD6aab5161C5DC3f20210b2e4B4d01196737F1EF',
     abi,
     signerOrProvider: signer
   })
   const toast = useToast()
-  const cutMsg = msg.substring(0, 1000) + (msg.length > 1000 ? '...' : '')
+  const cutMsg = msg.substring(0, 575) + (msg.length > 575 ? '...' : '')
 
   const sig = ethers.utils.splitSignature(signature as any)
   const signingAddr = ethers.utils.verifyMessage(msg, sig)
