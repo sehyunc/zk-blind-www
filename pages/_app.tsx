@@ -1,4 +1,4 @@
-import { Box, ChakraProvider, Container, extendTheme, Flex } from '@chakra-ui/react'
+import { ChakraProvider, extendTheme, Flex } from '@chakra-ui/react'
 import {
   darkTheme,
   getDefaultWallets,
@@ -6,6 +6,7 @@ import {
 } from '@rainbow-me/rainbowkit'
 import '@rainbow-me/rainbowkit/styles.css'
 import type { AppProps } from 'next/app'
+import { useRouter } from 'next/router'
 import { configureChains, createClient, goerli, WagmiConfig } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import '../styles/globals.css'
@@ -36,18 +37,18 @@ const theme = extendTheme({
 })
 
 export default function App({ Component, pageProps }: AppProps) {
-  const isLoggedIn = true
+  const { pathname } = useRouter()
   return (
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains} theme={darkTheme()}>
         <ChakraProvider theme={theme}>
           <Flex
-          justifyContent='center'
-            flexDirection='row'
-            margin='0 auto'
-            gap='4'
-            >
-              {isLoggedIn && <Sidebar />}
+            justifyContent="center"
+            flexDirection="row"
+            margin="0 auto"
+            gap="4"
+          >
+            {pathname !== '/login' && <Sidebar />}
             <Component {...pageProps} />
           </Flex>
         </ChakraProvider>
