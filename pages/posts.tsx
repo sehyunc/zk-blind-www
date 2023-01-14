@@ -2,8 +2,9 @@
 import { Button, Container, Flex, Text, useDisclosure } from '@chakra-ui/react'
 import { Silkscreen } from '@next/font/google'
 import { useEffect, useState } from 'react'
-import { getPosts } from './firebase'
+import { getPosts, getPostsFilterDomain } from './firebase'
 import { Karla } from '@next/font/google'
+import { useRouter } from "next/router"
 
 const font = Silkscreen({ subsets: ['latin'], weight: '400' })
 const bodyFont = Karla({weight: '300'})
@@ -13,13 +14,23 @@ const Display = () => {
   const [posts, setPosts] = useState([])
   console.log('🚀 ~ Display ~ posts', posts)
 
+  const router = useRouter();
+
   useEffect(() => {
+
     const fetchPosts = async () => {
-      const res = await getPosts()
-      setPosts(res as any)
+      console.log(router.query.domain)
+      if (router.query.domain != undefined) {
+        const res = await getPostsFilterDomain(router.query.domain)
+        setPosts(res as any)
+      } else {
+        const res = await getPosts()
+        setPosts(res as any)
+      }
     }
     fetchPosts()
-  }, [])
+  }, [router.query.domain])
+
 
   const Domain =({domain}: {domain:string}) => {
     return (
